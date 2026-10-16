@@ -22,7 +22,7 @@
 <label class="switch"><input id="sponsorCarouselEnabled" type="checkbox"> Enable sponsored logos (ON/OFF)</label>
 <label for="sponsorPhotoUrls">Sponsor photo URLs (one direct HTTP/HTTPS image URL per line; order is display order)</label>
 <textarea id="sponsorPhotoUrls" rows="5" maxlength="10000" placeholder="https://example.com/sponsor-1.png&#10;https://example.com/sponsor-2.png"></textarea>
-<div class="row" style="align-items:center"><input id="sponsorSingleLogoUrl" type="url" placeholder="Add one more logo URL (HTTP/HTTPS)" aria-label="Add one sponsor logo URL"><button type="button" class="secondary" style="flex:0 0 auto;margin:6px 0 11px" onclick="addSponsorLogoUrl()">➕ Add Logo</button></div>
+<div class="row" style="align-items:center"><input id="sponsorSingleLogoUrl" type="url" placeholder="Add one more logo URL (HTTP/HTTPS)" aria-label="Add one sponsor logo URL"><button id="addSponsorLogoButton" type="button" class="secondary" style="flex:0 0 auto;margin:6px 0 11px">➕ Add Logo</button></div>
 <p class="muted">Or add logos one at a time using the Add Logo button. The URL is added to the list above and appears in Preview immediately; press Save Sponsored Logo Settings to publish it.</p>
 <p class="muted">Paste direct image links only (for example, a URL ending in .png, .jpg, .jpeg, or .webp). Up to 20 photos. Delete a URL line to remove a photo; reorder lines to change display order. Each photo displays for 10 seconds and the sequence repeats every 10 minutes.</p>
 <div id="sponsorPreviewWrap" style="border:1px solid #d5dbe5;border-radius:12px;padding:12px;margin:10px 0;background:#f8fafc"><h3 style="margin:0 0 8px">🖼️ Logo Preview <span id="sponsorPreviewCount" class="muted">0 / 20</span></h3><p class="muted">Check each logo before saving. Images are shown separately so they will not overlap. Change the URL order above to change display order.</p><div id="sponsorPreviewGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:10px"></div><p id="sponsorPreviewEmpty" class="muted" style="margin:8px 0">Paste image URLs above to preview logos here.</p></div>
@@ -161,6 +161,7 @@ $('sponsorPhotoUrls').value=current.join('\n');
 field.value='';
 renderSponsorPreview();
 }
+$('addSponsorLogoButton').addEventListener('click',addSponsorLogoUrl);
 function saveSettings(){
 const logoUrl=$('tickerLogoUrl').value.trim();
 if(logoUrl){try{const u=new URL(logoUrl);if(!['http:','https:'].includes(u.protocol))throw 0;}catch(e){alert('Please enter a valid HTTP/HTTPS ticker logo image URL.');return;}}
