@@ -48,6 +48,52 @@
 </section>
 </main></div>
 
+<script>
+/* Standalone sponsor-logo UI: keep Add Logo and Preview working even if Firebase module imports fail. */
+(function(){
+  const byId=id=>document.getElementById(id);
+  function renderPreview(){
+    const textarea=byId('sponsorPhotoUrls'),grid=byId('sponsorPreviewGrid'),empty=byId('sponsorPreviewEmpty'),count=byId('sponsorPreviewCount');
+    if(!textarea||!grid||!empty||!count)return;
+    const urls=textarea.value.split(/\\r?\\n/).map(s=>s.trim()).filter(Boolean).slice(0,20);
+    count.textContent=urls.length+' / 20';
+    grid.replaceChildren();
+    urls.forEach((url,index)=>{
+      const card=document.createElement('div');
+      card.style.cssText='min-width:0;border:1px solid #dbe2ea;border-radius:10px;padding:8px;background:#fff;overflow:hidden';
+      const heading=document.createElement('div');heading.textContent='Logo '+(index+1);heading.style.cssText='font-size:12px;font-weight:700;margin-bottom:6px';
+      const frame=document.createElement('div');frame.style.cssText='height:105px;display:flex;align-items:center;justify-content:center;background:#f1f5f9;border-radius:7px;padding:5px';
+      let valid=false;try{const parsed=new URL(url);valid=['http:','https:'].includes(parsed.protocol);}catch(_){}
+      if(valid){
+        const img=document.createElement('img');img.src=url;img.alt='Sponsor logo '+(index+1);img.style.cssText='display:block;max-width:100%;max-height:95px;width:auto;height:auto;object-fit:contain';
+        img.onerror=()=>{frame.replaceChildren();const err=document.createElement('span');err.textContent='Image failed to load — check direct image URL';err.style.cssText='color:#b91c1c;font-size:12px;text-align:center';frame.append(err);};
+        frame.append(img);
+      } else {frame.textContent='Invalid HTTP/HTTPS URL';frame.style.color='#b91c1c';}
+      const urlText=document.createElement('div');urlText.textContent=url;urlText.style.cssText='font-size:11px;color:#64748b;overflow-wrap:anywhere;margin-top:6px;max-height:42px;overflow:hidden';
+      card.append(heading,frame,urlText);grid.append(card);
+    });
+    empty.style.display=urls.length?'none':'block';
+  }
+  function addLogo(){
+    const field=byId('sponsorSingleLogoUrl'),textarea=byId('sponsorPhotoUrls');
+    const value=field.value.trim();
+    if(!value){field.focus();alert('Please enter a logo image URL first.');return;}
+    let parsed;try{parsed=new URL(value);if(!['http:','https:'].includes(parsed.protocol))throw new Error();}catch(_){field.focus();alert('Please enter a valid HTTP/HTTPS logo image URL.');return;}
+    const urls=textarea.value.split(/\\r?\\n/).map(s=>s.trim()).filter(Boolean);
+    if(urls.length>=20){alert('You can add up to 20 sponsor logos.');return;}
+    if(urls.includes(parsed.href)||urls.includes(value)){alert('This logo URL is already in the list.');return;}
+    urls.push(parsed.href);textarea.value=urls.join('\\n');field.value='';renderPreview();
+    window.dispatchEvent(new CustomEvent('jon:sponsor-logo-added',{detail:{url:parsed.href}}));
+  }
+  document.addEventListener('DOMContentLoaded',function(){
+    const button=byId('addSponsorLogoButton'),textarea=byId('sponsorPhotoUrls'),field=byId('sponsorSingleLogoUrl');
+    if(button)button.addEventListener('click',addLogo);
+    if(field)field.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addLogo();}});
+    if(textarea)textarea.addEventListener('input',renderPreview);
+    renderPreview();
+  });
+})();
+</script>
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
@@ -165,8 +211,13 @@ await save();
 const status=$('fbStatus');
 if(status && !status.textContent.includes('failed'))status.textContent='🟢 Logo added and saved';
 }
-$('addSponsorLogoButton').addEventListener('click',addSponsorLogoUrl);
-$('sponsorSingleLogoUrl').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addSponsorLogoUrl();}});
+window.addEventListener('jon:sponsor-logo-added',async e=>{
+const current=($('sponsorPhotoUrls').value||'').split(/\\r?\\n/).map(x=>x.trim()).filter(Boolean);
+d.settings.sponsorLogoCarousel={...(d.settings.sponsorLogoCarousel||{}),enabled:$('sponsorCarouselEnabled').checked,photos:current,intervalMinutes:10,photoSeconds:10};
+await save();
+const status=$('fbStatus');
+if(status&&!status.textContent.includes('failed'))status.textContent='🟢 Logo added and saved';
+});
 function saveSettings(){
 const logoUrl=$('tickerLogoUrl').value.trim();
 if(logoUrl){try{const u=new URL(logoUrl);if(!['http:','https:'].includes(u.protocol))throw 0;}catch(e){alert('Please enter a valid HTTP/HTTPS ticker logo image URL.');return;}}
