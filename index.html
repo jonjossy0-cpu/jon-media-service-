@@ -153,11 +153,11 @@ const value=field.value.trim();
 if(!value)return alert('Please enter a logo image URL first.');
 let url;
 try{url=new URL(value);if(!['http:','https:'].includes(url.protocol))throw 0;}catch(e){return alert('Please enter a valid HTTP/HTTPS logo image URL.');}
-const current=($('sponsorPhotoUrls').value||'').split(/\\r?\\n/).map(x=>x.trim()).filter(Boolean);
+const current=($('sponsorPhotoUrls').value||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
 if(current.length>=20)return alert('You can add up to 20 sponsor logos.');
 if(current.includes(value))return alert('This logo URL is already in the list.');
 current.push(value);
-$('sponsorPhotoUrls').value=current.join('\\n');
+$('sponsorPhotoUrls').value=current.join('\n');
 field.value='';
 renderSponsorPreview();
 }
