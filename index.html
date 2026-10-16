@@ -55,7 +55,7 @@
   function renderPreview(){
     const textarea=byId('sponsorPhotoUrls'),grid=byId('sponsorPreviewGrid'),empty=byId('sponsorPreviewEmpty'),count=byId('sponsorPreviewCount');
     if(!textarea||!grid||!empty||!count)return;
-    const urls=textarea.value.split(/\\r?\\n/).map(s=>s.trim()).filter(Boolean).slice(0,20);
+    const urls=textarea.value.split(/\r?\n/).map(s=>s.trim()).filter(Boolean).slice(0,20);
     count.textContent=urls.length+' / 20';
     grid.replaceChildren();
     urls.forEach((url,index)=>{
@@ -79,10 +79,10 @@
     const value=field.value.trim();
     if(!value){field.focus();alert('Please enter a logo image URL first.');return;}
     let parsed;try{parsed=new URL(value);if(!['http:','https:'].includes(parsed.protocol))throw new Error();}catch(_){field.focus();alert('Please enter a valid HTTP/HTTPS logo image URL.');return;}
-    const urls=textarea.value.split(/\\r?\\n/).map(s=>s.trim()).filter(Boolean);
+    const urls=textarea.value.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
     if(urls.length>=20){alert('You can add up to 20 sponsor logos.');return;}
     if(urls.includes(parsed.href)||urls.includes(value)){alert('This logo URL is already in the list.');return;}
-    urls.push(parsed.href);textarea.value=urls.join('\\n');field.value='';renderPreview();
+    urls.push(parsed.href);textarea.value=urls.join('\n');field.value='';renderPreview();
     window.dispatchEvent(new CustomEvent('jon:sponsor-logo-added',{detail:{url:parsed.href}}));
   }
   document.addEventListener('DOMContentLoaded',function(){
@@ -212,7 +212,7 @@ const status=$('fbStatus');
 if(status && !status.textContent.includes('failed'))status.textContent='🟢 Logo added and saved';
 }
 window.addEventListener('jon:sponsor-logo-added',async e=>{
-const current=($('sponsorPhotoUrls').value||'').split(/\\r?\\n/).map(x=>x.trim()).filter(Boolean);
+const current=($('sponsorPhotoUrls').value||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
 d.settings.sponsorLogoCarousel={...(d.settings.sponsorLogoCarousel||{}),enabled:$('sponsorCarouselEnabled').checked,photos:current,intervalMinutes:10,photoSeconds:10};
 await save();
 const status=$('fbStatus');
