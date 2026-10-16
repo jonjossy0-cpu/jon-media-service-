@@ -20,9 +20,15 @@
 <hr><h2>🤝 Full Screen Sponsored Logos</h2>
 <p class="muted">Displays a small sponsor photo box only while a TV player is in Full Screen. Each photo shows for 10 seconds, then the next photo slides in from the right. The box slides up from the bottom and hides after the list finishes. The sequence repeats every 10 minutes.</p>
 <label class="switch"><input id="sponsorCarouselEnabled" type="checkbox"> Enable sponsored logos (ON/OFF)</label>
-<label for="sponsorPhotoUrls">Sponsor photo URLs (one direct HTTP/HTTPS image URL per line; order is display order)</label>
-<textarea id="sponsorPhotoUrls" rows="5" maxlength="10000" placeholder="https://example.com/sponsor-1.png&#10;https://example.com/sponsor-2.png"></textarea>
-<p class="muted">Up to 20 photos. The label “SPONSORED” appears below the image. These settings are separate from the existing news ticker.</p>
+<label for="sponsorPhotoFiles">Upload sponsor photos</label>
+<input id="sponsorPhotoFiles" type="file" accept="image/*" multiple>
+<p class="muted">Choose image files from your phone or computer, then tap Upload Photos. Each image must be 5 MB or smaller; maximum 20 photos total. Uploaded images are stored in Firebase Storage.</p>
+<button class="primary" type="button" onclick="uploadSponsorPhotos()">⬆️ Upload Selected Photos</button>
+<div id="sponsorUploadStatus" class="muted" role="status" aria-live="polite"></div>
+<div id="sponsorPhotoPreview" class="row" style="margin:10px 0"></div>
+<label for="sponsorPhotoUrls">Sponsor photo order (one image URL per line)</label>
+<textarea id="sponsorPhotoUrls" rows="5" maxlength="10000" placeholder="Upload photos above, or paste direct HTTPS image URLs here.&#10;Each line is one photo; reorder lines to change display order."></textarea>
+<p class="muted">To remove a photo, delete its URL line. Up to 20 images. The carousel shows each photo for 10 seconds and repeats every 10 minutes.</p>
 <button class="primary" onclick="saveSettings()">Save Sponsored Logo Settings</button>
 <hr><h3>🔐 Account</h3><p class="muted">Admin password is managed securely by Firebase Authentication.</p></div><div class="panel"><h3>Preview</h3><pre id="preview"></pre></div></section>
 
@@ -51,6 +57,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebas
 import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app-check.js";
 
 import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-storage.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
 const firebaseConfig={apiKey:"AIzaSyC5uNWNp9KbcepO36VQCx8gfbyPmZW4fxM",authDomain:"jon-stream.firebaseapp.com",projectId:"jon-stream",storageBucket:"jon-stream.firebasestorage.app",messagingSenderId:"189801194527",appId:"1:189801194527:web:c7d99f83a2c4c604fa212a"};
@@ -60,6 +67,7 @@ let fbApp=null,db=null,appRef=null,auth=null;
 try{
 
   fbApp=initializeApp(firebaseConfig);
+  const sponsorStorage=getStorage(fbApp);
 
   initializeAppCheck(fbApp, {
     provider: new ReCaptchaV3Provider("6Le3cbYtAAAAAOdcVa3NOG1Md2ZADXvlnvf-ZlU1"),
@@ -117,7 +125,7 @@ function editBackground(id){
   if(sec!==null)x.seconds=Math.max(1,Number(sec)||5);
   save();
 }
-function render(){tc.textContent=d.tv.length;rc.textContent=d.radio.length;ac.textContent=d.ads.length;nc.textContent=d.notifications.length;ver.value=d.settings.version;maint.checked=d.settings.maintenance;feat.value=d.settings.featured||'';const ticker=d.settings.newsTicker||{};$('tickerEnabled').checked=!!ticker.enabled;$('tickerText').value=ticker.text||'';$('tickerLogoUrl').value=ticker.logoUrl||'';$('tickerSpeed').value=['1m','2m','3m','5m','8m','10m'].includes(ticker.speed)?ticker.speed:'5m';const sponsor=d.settings.sponsorLogoCarousel||{};$('sponsorCarouselEnabled').checked=sponsor.enabled===true;$('sponsorPhotoUrls').value=Array.isArray(sponsor.photos)?sponsor.photos.join('\n'):'';preview.textContent=JSON.stringify(d,null,2);let q=(tq.value||'').toLowerCase();tvlist.innerHTML=d.tv.filter(x=>(x.name+' '+x.country+' '+x.category).toLowerCase().includes(q)).map(x=>`<div class="item"><h3>📺 ${esc(x.name)} ${x.enabled?'<span class="badge">ON</span>':'<span class="badge off">OFF</span>'}</h3><div class="muted">${esc(x.country)} • ${esc(x.category)}<br>${esc(x.url)}</div><div class="actions"><button class="secondary" onclick="edit('tv',${x.id})">✏️ Edit</button><button class="secondary" onclick="toggle('tv',${x.id})">${x.enabled?'Disable':'Enable'}</button><button class="danger" onclick="del('tv',${x.id})">Delete</button></div></div>`).join('')||'<div class="panel muted">No TV channels.</div>';let r=(rq.value||'').toLowerCase();rlist.innerHTML=d.radio.filter(x=>x.name.toLowerCase().includes(r)).map(x=>`<div class="item"><h3>📻 ${esc(x.name)} ${x.enabled?'<span class="badge">ON</span>':'<span class="badge off">OFF</span>'}</h3><div class="muted">${esc(x.url)}</div><div class="actions"><button class="secondary" onclick="edit('radio',${x.id})">✏️ Edit</button><button class="secondary" onclick="toggle('radio',${x.id})">${x.enabled?'Disable':'Enable'}</button><button class="danger" onclick="del('radio',${x.id})">Delete</button></div></div>`).join('')||'<div class="panel muted">No radio stations.</div>';alist.innerHTML=d.ads.map(x=>`<div class="item"><h3>📢 ${esc(x.title)} ${x.enabled?'<span class="badge">ON</span>':'<span class="badge off">OFF</span>'}</h3><div class="muted">${esc(x.name)} • Position: ${esc(x.position)}<br>${esc(x.start||'')} → ${esc(x.end||'')}</div><p>${esc(x.description)}</p><div class="muted">Image: ${esc(x.image)}<br>Video: ${esc(x.videoUrl||x.videoURL||x.video||x.mediaUrl||'')}<br>Click: ${esc(x.url)}</div><div class="actions"><button class="secondary" onclick="toggle('ads',${x.id})">${x.enabled?'Disable':'Enable'}</button><button class="danger" onclick="del('ads',${x.id})">Delete</button></div></div>`).join('')||'<div class="panel muted">No advertisements.</div>';nlist.innerHTML=d.notifications.map(x=>`<div class="item"><h3>🔔 ${esc(x.title)}</h3><p>${esc(x.message)}</p><div class="actions"><button class="secondary" onclick="toggle('notifications',${x.id})">${x.enabled?'Disable':'Enable'}</button><button class="danger" onclick="del('notifications',${x.id})">Delete</button></div></div>`).join('')||'<div class="panel muted">No notifications.</div>';
+function render(){tc.textContent=d.tv.length;rc.textContent=d.radio.length;ac.textContent=d.ads.length;nc.textContent=d.notifications.length;ver.value=d.settings.version;maint.checked=d.settings.maintenance;feat.value=d.settings.featured||'';const ticker=d.settings.newsTicker||{};$('tickerEnabled').checked=!!ticker.enabled;$('tickerText').value=ticker.text||'';$('tickerLogoUrl').value=ticker.logoUrl||'';$('tickerSpeed').value=['1m','2m','3m','5m','8m','10m'].includes(ticker.speed)?ticker.speed:'5m';const sponsor=d.settings.sponsorLogoCarousel||{};$('sponsorCarouselEnabled').checked=sponsor.enabled===true;$('sponsorPhotoUrls').value=Array.isArray(sponsor.photos)?sponsor.photos.join('\n'):'';renderSponsorPhotoPreviews(sponsor.photos||[]);preview.textContent=JSON.stringify(d,null,2);let q=(tq.value||'').toLowerCase();tvlist.innerHTML=d.tv.filter(x=>(x.name+' '+x.country+' '+x.category).toLowerCase().includes(q)).map(x=>`<div class="item"><h3>📺 ${esc(x.name)} ${x.enabled?'<span class="badge">ON</span>':'<span class="badge off">OFF</span>'}</h3><div class="muted">${esc(x.country)} • ${esc(x.category)}<br>${esc(x.url)}</div><div class="actions"><button class="secondary" onclick="edit('tv',${x.id})">✏️ Edit</button><button class="secondary" onclick="toggle('tv',${x.id})">${x.enabled?'Disable':'Enable'}</button><button class="danger" onclick="del('tv',${x.id})">Delete</button></div></div>`).join('')||'<div class="panel muted">No TV channels.</div>';let r=(rq.value||'').toLowerCase();rlist.innerHTML=d.radio.filter(x=>x.name.toLowerCase().includes(r)).map(x=>`<div class="item"><h3>📻 ${esc(x.name)} ${x.enabled?'<span class="badge">ON</span>':'<span class="badge off">OFF</span>'}</h3><div class="muted">${esc(x.url)}</div><div class="actions"><button class="secondary" onclick="edit('radio',${x.id})">✏️ Edit</button><button class="secondary" onclick="toggle('radio',${x.id})">${x.enabled?'Disable':'Enable'}</button><button class="danger" onclick="del('radio',${x.id})">Delete</button></div></div>`).join('')||'<div class="panel muted">No radio stations.</div>';alist.innerHTML=d.ads.map(x=>`<div class="item"><h3>📢 ${esc(x.title)} ${x.enabled?'<span class="badge">ON</span>':'<span class="badge off">OFF</span>'}</h3><div class="muted">${esc(x.name)} • Position: ${esc(x.position)}<br>${esc(x.start||'')} → ${esc(x.end||'')}</div><p>${esc(x.description)}</p><div class="muted">Image: ${esc(x.image)}<br>Video: ${esc(x.videoUrl||x.videoURL||x.video||x.mediaUrl||'')}<br>Click: ${esc(x.url)}</div><div class="actions"><button class="secondary" onclick="toggle('ads',${x.id})">${x.enabled?'Disable':'Enable'}</button><button class="danger" onclick="del('ads',${x.id})">Delete</button></div></div>`).join('')||'<div class="panel muted">No advertisements.</div>';nlist.innerHTML=d.notifications.map(x=>`<div class="item"><h3>🔔 ${esc(x.title)}</h3><p>${esc(x.message)}</p><div class="actions"><button class="secondary" onclick="toggle('notifications',${x.id})">${x.enabled?'Disable':'Enable'}</button><button class="danger" onclick="del('notifications',${x.id})">Delete</button></div></div>`).join('')||'<div class="panel muted">No notifications.</div>';
 let bl=d.backgrounds||[];
 bglist.innerHTML=bl.map(x=>`<div class="item">
 <h3>🖼️ ${esc(x.name||'Background')} ${x.enabled?'<span class="badge">ON</span>':'<span class="badge off">OFF</span>'}</h3>
@@ -129,6 +137,38 @@ bglist.innerHTML=bl.map(x=>`<div class="item">
 <button class="danger" onclick="deleteBackground(${x.id})">Delete</button>
 </div></div>`).join('')||'<div class="panel muted">No background images.</div>'}
 
+function renderSponsorPhotoPreviews(urls){
+const el=$('sponsorPhotoPreview');if(!el)return;
+const list=Array.isArray(urls)?urls.filter(Boolean):[];
+el.innerHTML=list.map((url,i)=>'<div style="width:100px;max-width:30%;margin:4px;text-align:center"><img src="'+esc(url)+'" alt="Sponsor photo '+(i+1)+'" loading="lazy" style="width:100%;height:68px;object-fit:contain;background:#f3f4f6;border-radius:8px" onerror="this.style.opacity=.35"><div class="muted">Photo '+(i+1)+'</div></div>').join('');
+}
+async function uploadSponsorPhotos(){
+const picker=$('sponsorPhotoFiles'),status=$('sponsorUploadStatus'),files=Array.from(picker.files||[]);
+if(!files.length){alert('Please choose one or more photo files first.');return;}
+if(!auth||!auth.currentUser){alert('Please sign in to the Admin App first.');return;}
+const existing=$('sponsorPhotoUrls').value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+if(existing.length+files.length>20){alert('You can use up to 20 sponsor photos total. Remove some URLs first.');return;}
+for(const file of files){if(!file.type||!file.type.startsWith('image/')){alert('Only image files are allowed: '+file.name);return;}if(file.size>5*1024*1024){alert('Each photo must be 5 MB or smaller: '+file.name);return;}}
+status.textContent='Uploading '+files.length+' photo(s)…';
+const uploaded=[];
+try{
+for(let i=0;i<files.length;i++){
+const file=files[i],safeName=file.name.replace(/[^a-zA-Z0-9._-]/g,'_').slice(-100)||'sponsor-image';
+const path='sponsorLogos/'+auth.currentUser.uid+'/'+Date.now()+'-'+i+'-'+safeName;
+const result=await uploadBytes(storageRef(sponsorStorage,path),file,{contentType:file.type,cacheControl:'public,max-age=31536000'});
+uploaded.push(await getDownloadURL(result.ref));
+status.textContent='Uploaded '+(i+1)+' of '+files.length+' photo(s)…';
+}
+$('sponsorPhotoUrls').value=[...existing,...uploaded].join('\n');
+renderSponsorPhotoPreviews([...existing,...uploaded]);
+picker.value='';
+status.textContent='Upload complete. Tap “Save Sponsored Logo Settings” to publish the photo list.';
+}catch(e){
+console.error('Sponsor photo upload failed:',e);
+status.textContent='Upload failed: '+(e.code||e.message||'unknown error');
+alert('Photo upload failed. Check Firebase Storage is enabled and its rules allow signed-in admin uploads. Details: '+(e.code||e.message||'unknown error'));
+}
+}
 function saveSettings(){
 const logoUrl=$('tickerLogoUrl').value.trim();
 if(logoUrl){try{const u=new URL(logoUrl);if(!['http:','https:'].includes(u.protocol))throw 0;}catch(e){alert('Please enter a valid HTTP/HTTPS ticker logo image URL.');return;}}
