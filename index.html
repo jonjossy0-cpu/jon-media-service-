@@ -4,13 +4,47 @@
 
 <div id="login"><div class="loginbox"><h2>🔐 JON Stream Admin</h2><p class="muted">Secure Admin login</p><input id="le" type="email" placeholder="Admin email" autocomplete="username"><input id="lp" type="password" placeholder="Admin password" autocomplete="current-password"><button class="primary" style="width:100%" onclick="login()">Login</button><p id="lm" style="color:#b91c1c"></p></div></div>
 
-<div id="app" style="display:none"><header><h1>JON Stream Admin</h1><small>TV • Radio • Ads • Notifications • Settings</small></header><nav><button class="active" onclick="page('dash',this)">📊 Dashboard</button><button onclick="page('tv',this)">📺 TV</button><button onclick="page('radio',this)">📻 Radio</button><button onclick="page('ads',this)">📢 Ads</button><button onclick="page('notify',this)">🔔 Notify</button><button onclick="page('settings',this)">⚙️ Settings</button><button onclick="page('background',this)">🖼️ Background</button><button class="danger" onclick="logout()">Logout</button></nav><div id="fbStatus" style="padding:8px 15px;text-align:center;font-weight:700;background:#eefbf1;color:#16753a">🟡 Connecting Firebase...</div><main>
+<div id="app" style="display:none"><header><h1>JON Stream Admin</h1><small>TV • Radio • Ads • Notifications • Settings</small></header><nav><button class="active" onclick="page('dash',this)">📊 Dashboard</button><button onclick="page('tv',this)">📺 TV</button><button onclick="page('radio',this)">📻 Radio</button><button onclick="page('premium',this)">👑 Premium</button><button onclick="page('ads',this)">📢 Ads</button><button onclick="page('notify',this)">🔔 Notify</button><button onclick="page('settings',this)">⚙️ Settings</button><button onclick="page('background',this)">🖼️ Background</button><button class="danger" onclick="logout()">Logout</button></nav><div id="fbStatus" style="padding:8px 15px;text-align:center;font-weight:700;background:#eefbf1;color:#16753a">🟡 Connecting Firebase...</div><main>
 
 <section id="dash" class="page active"><div class="cards"><div class="card">📺 TV<b id="tc">0</b><span class="muted">channels</span></div><div class="card">📻 Radio<b id="rc">0</b><span class="muted">stations</span></div><div class="card">📢 Ads<b id="ac">0</b><span class="muted">advertisements</span></div><div class="card">🔔 Alerts<b id="nc">0</b><span class="muted">notifications</span></div></div><div class="panel"><h3>💾 Data</h3><p class="muted">This version stores data locally and can export/import data.json. Later it can be connected to your online backend.</p><button class="primary" onclick="exportData()">Export data.json</button> <button class="secondary" onclick="document.getElementById('fi').click()">Import</button><input id="fi" type="file" accept=".json" hidden onchange="importData(event)"></div></section>
 
 <section id="tv" class="page"><div class="panel"><h2>📺 TV Manager</h2><input id="tq" placeholder="Search TV..." oninput="render()"><div class="row"><input id="tn" placeholder="Channel name"><input id="tu" placeholder="M3U8/HLS URL"></div><div class="row"><input id="tl" placeholder="Logo URL"><input id="tco" placeholder="Country"></div><input id="tcat" placeholder="Category"><label for="tTier">Access level</label><select id="tTier"><option value="free">Free — everyone</option><option value="premium">Premium — subscribers/trial</option></select><button class="primary" onclick="addTV()">➕ Add TV</button></div><div id="tvlist"></div></section>
 
 <section id="radio" class="page"><div class="panel"><h2>📻 Radio Manager</h2><input id="rq" placeholder="Search Radio..." oninput="render()"><div class="row"><input id="rn" placeholder="Station name"><input id="ru" placeholder="Stream URL"></div><input id="rl" placeholder="Logo URL"><label for="rTier">Access level</label><select id="rTier"><option value="free">Free — everyone</option><option value="premium">Premium — subscribers/trial</option></select><button class="primary" onclick="addRadio()">➕ Add Radio</button></div><div id="rlist"></div></section>
+
+
+<section id="premium" class="page">
+ <div class="panel">
+  <h2>👑 Premium Membership</h2>
+  <p class="muted">Manage Premium prices, grant or extend access by email, revoke access, and review grants. Admin API access is required for changes.</p>
+  <div class="cards">
+   <div class="card">🆓 Verified email trial<b>3 days</b><span class="muted">After email verification</span></div>
+   <div class="card">💳 Monthly price<b id="pMonthlyDisplay">499 ETB</b><span class="muted">Current plan price</span></div>
+   <div class="card">📅 Yearly price<b id="pYearlyDisplay">6,000 ETB</b><span class="muted">Current plan price</span></div>
+  </div>
+  <p id="premiumStatus" class="muted">Press Refresh to load Premium settings and access list.</p>
+  <button class="secondary" type="button" onclick="loadPremium()">🔄 Refresh Premium data</button>
+ </div>
+ <div class="panel">
+  <h3>💰 Premium pricing (ETB)</h3>
+  <label for="pMonthly">Monthly plan price</label><input id="pMonthly" type="number" min="0" step="1" value="499">
+  <label for="pYearly">Yearly plan price</label><input id="pYearly" type="number" min="0" step="1" value="6000">
+  <button class="primary" type="button" onclick="savePremiumPrices()">Save prices</button>
+ </div>
+ <div class="panel">
+  <h3>➕ Grant / extend Premium access</h3>
+  <label for="pEmail">User email address</label><input id="pEmail" type="email" placeholder="user@example.com" autocomplete="email">
+  <label for="pDuration">Access duration</label>
+  <select id="pDuration"><option value="7">7 days</option><option value="30" selected>30 days</option><option value="90">90 days</option><option value="365">365 days</option><option value="unlimited">Unlimited</option></select>
+  <div class="row"><button class="primary" type="button" onclick="grantPremium('grant')">Grant Premium</button><button class="secondary" type="button" onclick="grantPremium('extend')">Extend Premium</button></div>
+  <p class="muted">This grants access through the server API. It does not charge a payment or confirm Telebirr payment.</p>
+ </div>
+ <div class="panel">
+  <h3>📋 Premium access list</h3>
+  <input id="pGrantSearch" placeholder="Filter by email..." oninput="renderPremiumGrants()">
+  <div id="premiumGrantList"><p class="muted">Load Premium data to see grants.</p></div>
+ </div>
+</section>
 
 <section id="ads" class="page"><div class="panel"><h2>📢 Advertisement Manager</h2><input id="an" placeholder="Advertisement name"><div class="row"><input id="at" placeholder="Title"><input id="ai" placeholder="Banner/Image URL"></div><input id="av" placeholder="Video URL (.mp4 / .webm / .m3u8)"><textarea id="ad" rows="3" placeholder="Description"></textarea><input id="au" placeholder="Click URL"><div class="row"><select id="ap"><option>Home</option><option>TV</option><option>Radio</option><option>All</option></select><input id="as" type="date"><input id="ae" type="date"></div><label class="switch"><input id="ax" type="checkbox" checked> Active</label><br><br><button class="primary" onclick="addAd()">➕ Add Advertisement</button></div><div id="alist"></div></section>
 
@@ -231,9 +265,72 @@ d.settings.featured=feat.value.trim();
 d.settings.newsTicker={enabled:$('tickerEnabled').checked,text:$('tickerText').value.trim(),logoUrl,speed:['1m','2m','3m','5m','8m','10m'].includes($('tickerSpeed').value)?$('tickerSpeed').value:'5m'};
 d.settings.sponsorLogoCarousel={enabled:$('sponsorCarouselEnabled').checked,photos:sponsorPhotos,intervalMinutes:10,photoSeconds:10};
 save();alert('Settings saved');
-}async function logout(){try{if(auth)await signOut(auth)}catch(e){console.error(e)}}function exportData(){let b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='data.json';a.click()}function importData(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(!x.tv||!x.radio)throw 0;d=x;save();alert('Imported')}catch(_){alert('Invalid data.json')}};r.readAsText(f)}
+}
+let premiumGrantsCache=[];
+const PREMIUM_API='https://jon-stream.vercel.app/api/subscription';
+async function premiumApi(path, options={}){
+ const user=auth&&auth.currentUser;
+ if(!user)throw new Error('Please log in to Admin first.');
+ const token=await user.getIdToken();
+ const response=await fetch(PREMIUM_API+path,{...options,headers:{'Content-Type':'application/json','Authorization':'Bearer '+token,...(options.headers||{})}});
+ let body={};try{body=await response.json()}catch(e){}
+ if(!response.ok)throw new Error(body.error||('Request failed ('+response.status+')'));
+ return body;
+}
+function premiumMessage(message,isError=false){const el=$('premiumStatus');if(el){el.textContent=message;el.style.color=isError?'#b91c1c':'#166534';}}
+async function loadPremium(){
+ premiumMessage('Loading Premium settings and grants...');
+ try{
+  const config=await premiumApi('/config');
+  $('pMonthly').value=config.monthlyPriceETB??499;$('pYearly').value=config.yearlyPriceETB??6000;
+  $('pMonthlyDisplay').textContent=Number(config.monthlyPriceETB??499).toLocaleString()+' ETB';
+  $('pYearlyDisplay').textContent=Number(config.yearlyPriceETB??6000).toLocaleString()+' ETB';
+  const grants=await premiumApi('/grants');
+  premiumGrantsCache=Array.isArray(grants.grants)?grants.grants:(Array.isArray(grants)?grants:[]);
+  renderPremiumGrants();premiumMessage('Premium settings loaded. Access grants: '+premiumGrantsCache.length+'.');
+ }catch(e){premiumMessage('Could not load Premium data: '+e.message+' — confirm Vercel Preview/Production API and admin UID setup.',true);}
+}
+async function savePremiumPrices(){
+ const monthly=Number($('pMonthly').value),yearly=Number($('pYearly').value);
+ if(!Number.isFinite(monthly)||monthly<0||!Number.isFinite(yearly)||yearly<0)return alert('Enter valid non-negative prices in ETB.');
+ try{
+  premiumMessage('Saving prices...');
+  const data=await premiumApi('/config',{method:'POST',body:JSON.stringify({monthlyPriceETB:monthly,yearlyPriceETB:yearly})});
+  $('pMonthlyDisplay').textContent=Number(data.monthlyPriceETB).toLocaleString()+' ETB';$('pYearlyDisplay').textContent=Number(data.yearlyPriceETB).toLocaleString()+' ETB';
+  premiumMessage('Premium prices saved successfully.');
+ }catch(e){premiumMessage('Price save failed: '+e.message,true);alert('Could not save prices: '+e.message);}
+}
+async function grantPremium(action){
+ const email=$('pEmail').value.trim().toLowerCase(),duration=$('pDuration').value;
+ if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return alert('Enter a valid user email address.');
+ if(action==='extend'&&!confirm('Extend Premium access for '+email+'?'))return;
+ try{
+  premiumMessage(action==='extend'?'Extending Premium access...':'Granting Premium access...');
+  const result=await premiumApi('/grant',{method:'POST',body:JSON.stringify({action,email,duration:duration==='unlimited'?'unlimited':Number(duration)})});
+  premiumMessage('Premium '+(action==='extend'?'extended':'granted')+' for '+email+(result.expiresAt?'. Expires: '+new Date(result.expiresAt).toLocaleString():'. Unlimited access.')+(result.accountFound?'':' Account not registered yet; email grant saved.'));
+  await loadPremium();
+ }catch(e){premiumMessage('Premium grant failed: '+e.message,true);alert('Could not update Premium access: '+e.message);}
+}
+async function revokePremium(email){
+ if(!confirm('Revoke Premium access for '+email+'?'))return;
+ try{await premiumApi('/grant',{method:'POST',body:JSON.stringify({action:'revoke',email})});premiumMessage('Premium access revoked for '+email+'.');await loadPremium();}
+ catch(e){premiumMessage('Revoke failed: '+e.message,true);alert('Could not revoke Premium: '+e.message);}
+}
+function renderPremiumGrants(){
+ const target=$('premiumGrantList');if(!target)return;
+ const q=($('pGrantSearch')?.value||'').trim().toLowerCase();
+ const rows=premiumGrantsCache.filter(g=>String(g.email||'').toLowerCase().includes(q));
+ target.innerHTML=rows.map(g=>{
+  const email=String(g.email||'Unknown email');
+  const active=!!g.active&&(g.unlimited||!g.expiresAt||new Date(g.expiresAt).getTime()>Date.now());
+  const expiry=g.unlimited?'Unlimited':(g.expiresAt?new Date(g.expiresAt).toLocaleString():'No expiry supplied');
+  return '<div class="item"><h3>'+esc(email)+' '+(active?'<span class="badge">ACTIVE</span>':'<span class="badge off">INACTIVE / EXPIRED</span>')+'</h3><div class="muted">Expires: '+esc(expiry)+'</div><div class="actions"><button class="danger" type="button" onclick="revokePremium('+JSON.stringify(email).replace(/</g,'\\u003c')+')">Revoke access</button></div></div>';
+ }).join('')||'<p class="muted">No matching Premium grants were returned by the API.</p>';
+}
 
-window.addSponsorLogoUrl=addSponsorLogoUrl;document.getElementById('addSponsorLogoButton')?.addEventListener('click',addSponsorLogoUrl);window.page=page;window.login=login;
+async function logout(){try{if(auth)await signOut(auth)}catch(e){console.error(e)}}function exportData(){let b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='data.json';a.click()}function importData(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(!x.tv||!x.radio)throw 0;d=x;save();alert('Imported')}catch(_){alert('Invalid data.json')}};r.readAsText(f)}
+
+window.addSponsorLogoUrl=addSponsorLogoUrl;document.getElementById('addSponsorLogoButton')?.addEventListener('click',addSponsorLogoUrl);window.page=page;window.login=login;window.loadPremium=loadPremium;window.savePremiumPrices=savePremiumPrices;window.grantPremium=grantPremium;window.revokePremium=revokePremium;window.renderPremiumGrants=renderPremiumGrants;
 onAuthStateChanged(auth,user=>{if(user){$('login').style.display='none';$('app').style.display='block';startFirestoreSync();render()}else{$('login').style.display='flex';$('app').style.display='none';$('lp').value='';}});window.addTV=addTV;window.addRadio=addRadio;window.setTier=setTier;window.addAd=addAd;window.addNotify=addNotify;window.toggle=toggle;window.del=del;window.edit=edit;window.saveSettings=saveSettings;window.logout=logout;window.exportData=exportData;window.importData=importData;window.addBackground=addBackground;window.toggleBackground=toggleBackground;window.deleteBackground=deleteBackground;window.editBackground=editBackground;
 
 </script></body></html>
