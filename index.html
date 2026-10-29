@@ -158,8 +158,13 @@
         new Promise(function(_,reject){timer=setTimeout(function(){reject(new Error('Sign-in timed out after 15 seconds. Check connection and Firebase authorized domains.'));},15000);})
       ]);
       clearTimeout(timer);
-      message('Signed in successfully. Reloading Admin App…');
-      setTimeout(function(){location.reload();},500);
+      // Do not reload after sign-in: embedded browsers can close/reset the app on reload.
+      // Firebase onAuthStateChanged in the module script will open the Admin UI.
+      message('Sign-in successful. Opening Admin App…');
+      var loginPanel=document.getElementById('login');
+      var appPanel=document.getElementById('app');
+      if(loginPanel)loginPanel.style.display='none';
+      if(appPanel)appPanel.style.display='block';
     } catch(e) {
       console.error('Admin login fallback:',e);
       var errors={
