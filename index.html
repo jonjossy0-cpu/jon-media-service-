@@ -185,7 +185,7 @@
 </script>
 <script type="module">
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
 import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app-check.js";
 
 import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
@@ -197,7 +197,7 @@ const firebaseConfig={apiKey:"AIzaSyC5uNWNp9KbcepO36VQCx8gfbyPmZW4fxM",authDomai
 let fbApp=null,db=null,appRef=null,auth=null;
 
 try{
-  fbApp=initializeApp(firebaseConfig);
+  fbApp=getApps().length?getApp():initializeApp(firebaseConfig);
   // Keep Authentication and Firestore available even if App Check/recaptcha setup fails.
   auth=getAuth(fbApp);
   db=getFirestore(fbApp);
@@ -390,6 +390,6 @@ function renderPremiumGrants(){
 async function logout(){try{if(auth)await signOut(auth)}catch(e){console.error(e)}}function exportData(){let b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='data.json';a.click()}function importData(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(!x.tv||!x.radio)throw 0;d=x;save();alert('Imported')}catch(_){alert('Invalid data.json')}};r.readAsText(f)}
 
 window.addSponsorLogoUrl=addSponsorLogoUrl;document.getElementById('addSponsorLogoButton')?.addEventListener('click',addSponsorLogoUrl);window.page=page;window.login=login;window.loadPremium=loadPremium;window.savePremiumPrices=savePremiumPrices;window.grantPremium=grantPremium;window.revokePremium=revokePremium;window.renderPremiumGrants=renderPremiumGrants;
-onAuthStateChanged(auth,user=>{if(user){$('login').style.display='none';$('app').style.display='block';startFirestoreSync();render()}else{$('login').style.display='flex';$('app').style.display='none';$('lp').value='';}});window.addTV=addTV;window.addRadio=addRadio;window.setTier=setTier;window.addAd=addAd;window.addNotify=addNotify;window.toggle=toggle;window.del=del;window.edit=edit;window.saveSettings=saveSettings;window.logout=logout;window.exportData=exportData;window.importData=importData;window.addBackground=addBackground;window.toggleBackground=toggleBackground;window.deleteBackground=deleteBackground;window.editBackground=editBackground;
+onAuthStateChanged(auth,user=>{if(user){$('login').style.display='none';$('app').style.display='block';startFirestoreSync();render()}else{$('login').style.display='flex';$('app').style.display='none';$('lp').value='';}},error=>{console.error('Firebase sign-in state error:',error);const msg=document.getElementById('lm');if(msg)msg.textContent='Firebase sign-in state error: '+(error?.code||error?.message||'unknown');});window.addTV=addTV;window.addRadio=addRadio;window.setTier=setTier;window.addAd=addAd;window.addNotify=addNotify;window.toggle=toggle;window.del=del;window.edit=edit;window.saveSettings=saveSettings;window.logout=logout;window.exportData=exportData;window.importData=importData;window.addBackground=addBackground;window.toggleBackground=toggleBackground;window.deleteBackground=deleteBackground;window.editBackground=editBackground;
 
 </script></body></html>
