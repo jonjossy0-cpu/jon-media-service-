@@ -170,7 +170,7 @@ function saveSettings(){d.settings.version=ver.value.trim()||'1.0.0';d.settings.
 
 window.page=page;window.login=login;window.logout=logout;window.addTV=addTV;window.addRadio=addRadio;window.addAd=addAd;window.addNotify=addNotify;window.toggle=toggle;window.del=del;window.edit=edit;window.saveSettings=saveSettings;window.changePass=changePass;window.exportData=exportData;window.importData=importData;window.addBackground=addBackground;window.toggleBackground=toggleBackground;window.deleteBackground=deleteBackground;window.editBackground=editBackground;
 
-onAuthStateChanged(auth,user=>{
+if(auth)onAuthStateChanged(auth,user=>{
  const loginPanel=$('login'),appPanel=$('app'),status=$('fbStatus');
  if(user){
   loginPanel.style.display='none';appPanel.style.display='block';
