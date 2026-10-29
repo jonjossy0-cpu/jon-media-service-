@@ -2,7 +2,7 @@
 
 </style></head><body>
 
-<div id="login"><div class="loginbox"><h2>🔐 JON Stream Admin</h2><p class="muted">Secure Admin login</p><input id="le" type="email" placeholder="Admin email" autocomplete="username"><input id="lp" type="password" placeholder="Admin password" autocomplete="current-password"><button class="primary" style="width:100%" onclick="window.__jonAdminLoginClick ? window.__jonAdminLoginClick() : (document.getElementById('lm').textContent='Login handler did not load. Reload this page and check your internet connection.')">Login</button><p id="lm" style="color:#b91c1c"></p></div></div>
+<div id="login"><div class="loginbox"><h2>🔐 JON Stream Admin</h2><p class="muted">Secure Admin login</p><input id="le" type="email" placeholder="Admin email" autocomplete="username"><input id="lp" type="password" placeholder="Admin password" autocomplete="current-password"><button id="adminLoginButton" class="primary" style="width:100%" type="button">Login</button><p id="lm" style="color:#b91c1c"></p></div></div>
 
 <div id="app" style="display:none"><header><h1>JON Stream Admin</h1><small>TV • Radio • Ads • Notifications • Settings</small></header><nav><button class="active" onclick="page('dash',this)">📊 Dashboard</button><button onclick="page('tv',this)">📺 TV</button><button onclick="page('radio',this)">📻 Radio</button><button onclick="page('premium',this)">👑 Premium</button><button onclick="page('ads',this)">📢 Ads</button><button onclick="page('notify',this)">🔔 Notify</button><button onclick="page('settings',this)">⚙️ Settings</button><button onclick="page('background',this)">🖼️ Background</button><button class="danger" onclick="logout()">Logout</button></nav><div id="fbStatus" style="padding:8px 15px;text-align:center;font-weight:700;background:#eefbf1;color:#16753a">🟡 Connecting Firebase...</div><main>
 
@@ -130,8 +130,15 @@
 </script>
 <script>
 (function(){
-  var button = document.querySelector('#login button.primary');
+  var button = document.getElementById('adminLoginButton');
   var message = function(text){var el=document.getElementById('lm');if(el)el.textContent=text;};
+  // Bind through addEventListener instead of inline onclick, so login still responds when inline handlers are blocked.
+  if(button) button.addEventListener('click', function(event){
+    event.preventDefault();
+    if(typeof window.__jonAdminLoginClick === 'function') window.__jonAdminLoginClick();
+    else message('Login script is not ready. Reload the page and try again.');
+  });
+  ['le','lp'].forEach(function(id){var field=document.getElementById(id);if(field)field.addEventListener('keydown',function(event){if(event.key==='Enter'){event.preventDefault();if(button)button.click();}});});
   window.__jonAdminLoginClick = async function(){
     var email=(document.getElementById('le').value||'').trim();
     var password=document.getElementById('lp').value||'';
