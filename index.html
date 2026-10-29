@@ -145,10 +145,15 @@ try{
 
   fbApp=initializeApp(firebaseConfig);
 
-  initializeAppCheck(fbApp, {
-    provider: new ReCaptchaV3Provider("6Le3cbYtAAAAAOdcVa3NOG1Md2ZADXvlnvf-ZlU1"),
-    isTokenAutoRefreshEnabled: true
-  });
+  // App Check must not prevent Firebase Authentication from initializing.
+  try {
+    initializeAppCheck(fbApp, {
+      provider: new ReCaptchaV3Provider("6Le3cbYtAAAAAOdcVa3NOG1Md2ZADXvlnvf-ZlU1"),
+      isTokenAutoRefreshEnabled: true
+    });
+  } catch(appCheckError) {
+    console.error("Firebase App Check init failed:", appCheckError);
+  }
 
   db=getFirestore(fbApp);
   auth=getAuth(fbApp);
