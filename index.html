@@ -2,7 +2,7 @@
 
 </style></head><body>
 
-<div id="login"><div class="loginbox"><h2>🔐 JON Stream Admin</h2><p class="muted">Secure Admin login</p><input id="le" type="email" placeholder="Admin email" autocomplete="username"><input id="lp" type="password" placeholder="Admin password" autocomplete="current-password"><button class="primary" style="width:100%" onclick="if(window.login){window.login()}else{document.getElementById('lm').textContent='Login module did not load. Check your internet connection and reload the page.'}">Login</button><p id="lm" style="color:#b91c1c"></p></div></div>
+<div id="login"><div class="loginbox"><h2>🔐 JON Stream Admin</h2><p class="muted">Secure Admin login</p><input id="le" type="email" placeholder="Admin email" autocomplete="username"><input id="lp" type="password" placeholder="Admin password" autocomplete="current-password"><button class="primary" style="width:100%" onclick="window.__jonAdminLoginClick ? window.__jonAdminLoginClick() : (document.getElementById('lm').textContent='Login handler did not load. Reload this page and check your internet connection.')">Login</button><p id="lm" style="color:#b91c1c"></p></div></div>
 
 <div id="app" style="display:none"><header><h1>JON Stream Admin</h1><small>TV • Radio • Ads • Notifications • Settings</small></header><nav><button class="active" onclick="page('dash',this)">📊 Dashboard</button><button onclick="page('tv',this)">📺 TV</button><button onclick="page('radio',this)">📻 Radio</button><button onclick="page('premium',this)">👑 Premium</button><button onclick="page('ads',this)">📢 Ads</button><button onclick="page('notify',this)">🔔 Notify</button><button onclick="page('settings',this)">⚙️ Settings</button><button onclick="page('background',this)">🖼️ Background</button><button class="danger" onclick="logout()">Logout</button></nav><div id="fbStatus" style="padding:8px 15px;text-align:center;font-weight:700;background:#eefbf1;color:#16753a">🟡 Connecting Firebase...</div><main>
 
@@ -126,6 +126,49 @@
     if(textarea)textarea.addEventListener('input',renderPreview);
     renderPreview();
   });
+})();
+</script>
+<script>
+(function(){
+  var button = document.querySelector('#login button.primary');
+  var message = function(text){var el=document.getElementById('lm');if(el)el.textContent=text;};
+  window.__jonAdminLoginClick = async function(){
+    var email=(document.getElementById('le').value||'').trim();
+    var password=document.getElementById('lp').value||'';
+    if(!email||!password){message('Email and password are required.');return;}
+    if(typeof window.login==='function'){window.login();return;}
+    if(button){button.disabled=true;button.textContent='Connecting…';}
+    message('Starting secure sign-in…');
+    try {
+      var appMod=await import('https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js');
+      var authMod=await import('https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js');
+      var config={apiKey:'AIzaSyC5uNWNp9KbcepO36VQCx8gfbyPmZW4fxM',authDomain:'jon-stream.firebaseapp.com',projectId:'jon-stream',storageBucket:'jon-stream.firebasestorage.app',messagingSenderId:'189801194527',appId:'1:189801194527:web:c7d99f83a2c4c604fa212a'};
+      var app=appMod.getApps().length?appMod.getApp():appMod.initializeApp(config);
+      var auth=authMod.getAuth(app);
+      var timer;
+      await Promise.race([
+        authMod.signInWithEmailAndPassword(auth,email,password),
+        new Promise(function(_,reject){timer=setTimeout(function(){reject(new Error('Sign-in timed out after 15 seconds. Check connection and Firebase authorized domains.'));},15000);})
+      ]);
+      clearTimeout(timer);
+      message('Signed in successfully. Reloading Admin App…');
+      setTimeout(function(){location.reload();},500);
+    } catch(e) {
+      console.error('Admin login fallback:',e);
+      var errors={
+        'auth/invalid-credential':'Email or password is incorrect.',
+        'auth/invalid-email':'Enter a valid email address.',
+        'auth/user-disabled':'This account is disabled.',
+        'auth/too-many-requests':'Too many attempts. Wait and try again.',
+        'auth/network-request-failed':'Network error. Check your internet connection.',
+        'auth/operation-not-allowed':'Email/password sign-in is disabled in Firebase.',
+        'auth/unauthorized-domain':'This website domain is not authorized in Firebase Authentication.'
+      };
+      message(errors[e.code]||('Sign-in error: '+(e.code||'unknown')+' — '+(e.message||'Please try again.')));
+    } finally {
+      if(button){button.disabled=false;button.textContent='Login';}
+    }
+  };
 })();
 </script>
 <script type="module">
