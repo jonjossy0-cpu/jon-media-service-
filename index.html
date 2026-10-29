@@ -136,7 +136,7 @@
     var email=(document.getElementById('le').value||'').trim();
     var password=document.getElementById('lp').value||'';
     if(!email||!password){message('Email and password are required.');return;}
-    if(typeof window.login==='function'){window.login();return;}
+    // Always use this independent sign-in path; do not delegate to a possibly broken module login handler.
     if(button){button.disabled=true;button.textContent='Connecting…';}
     message('Starting secure sign-in…');
     try {
