@@ -2,66 +2,21 @@
 
 </style></head><body>
 
-<div id="login"><div class="loginbox"><h2>🔐 JON Stream Admin</h2><p class="muted">Secure Admin login</p><input id="le" type="email" placeholder="Admin email" autocomplete="username"><input id="lp" type="password" placeholder="Admin password" autocomplete="current-password"><button id="adminLoginButton" class="primary" style="width:100%" type="button">Login</button><p id="lm" style="color:#b91c1c"></p></div></div>
+<div id="login"><div class="loginbox"><h2>🔐 JON Stream Admin</h2><p class="muted">Secure Admin login</p><input id="le" type="email" placeholder="Admin email" autocomplete="username"><input id="lp" type="password" placeholder="Admin password" autocomplete="current-password"><button class="primary" style="width:100%" onclick="login()">Login</button><p id="lm" style="color:#b91c1c"></p></div></div>
 
-<div id="app" style="display:none"><header><h1>JON Stream Admin</h1><small>TV • Radio • Ads • Notifications • Settings</small></header><nav><button class="active" onclick="page('dash',this)">📊 Dashboard</button><button onclick="page('tv',this)">📺 TV</button><button onclick="page('radio',this)">📻 Radio</button><button onclick="page('premium',this)">👑 Premium</button><button onclick="page('ads',this)">📢 Ads</button><button onclick="page('notify',this)">🔔 Notify</button><button onclick="page('settings',this)">⚙️ Settings</button><button onclick="page('background',this)">🖼️ Background</button><button class="danger" onclick="logout()">Logout</button></nav><div id="fbStatus" style="padding:8px 15px;text-align:center;font-weight:700;background:#eefbf1;color:#16753a">🟡 Connecting Firebase...</div><main>
+<div id="app" style="display:none"><header><h1>JON Stream Admin</h1><small>TV • Radio • Ads • Notifications • Settings</small></header><nav><button class="active" onclick="page('dash',this)">📊 Dashboard</button><button onclick="page('tv',this)">📺 TV</button><button onclick="page('radio',this)">📻 Radio</button><button onclick="page('ads',this)">📢 Ads</button><button onclick="page('notify',this)">🔔 Notify</button><button onclick="page('settings',this)">⚙️ Settings</button><button onclick="page('background',this)">🖼️ Background</button><button class="danger" onclick="logout()">Logout</button></nav><div id="fbStatus" style="padding:8px 15px;text-align:center;font-weight:700;background:#eefbf1;color:#16753a">🟡 Connecting Firebase...</div><main>
 
 <section id="dash" class="page active"><div class="cards"><div class="card">📺 TV<b id="tc">0</b><span class="muted">channels</span></div><div class="card">📻 Radio<b id="rc">0</b><span class="muted">stations</span></div><div class="card">📢 Ads<b id="ac">0</b><span class="muted">advertisements</span></div><div class="card">🔔 Alerts<b id="nc">0</b><span class="muted">notifications</span></div></div><div class="panel"><h3>💾 Data</h3><p class="muted">This version stores data locally and can export/import data.json. Later it can be connected to your online backend.</p><button class="primary" onclick="exportData()">Export data.json</button> <button class="secondary" onclick="document.getElementById('fi').click()">Import</button><input id="fi" type="file" accept=".json" hidden onchange="importData(event)"></div></section>
 
-<section id="tv" class="page"><div class="panel"><h2>📺 TV Manager</h2><input id="tq" placeholder="Search TV..." oninput="render()"><div class="row"><input id="tn" placeholder="Channel name"><input id="tu" placeholder="M3U8/HLS URL"></div><div class="row"><input id="tl" placeholder="Logo URL"><input id="tco" placeholder="Country"></div><input id="tcat" placeholder="Category"><label for="tTier">Access level</label><select id="tTier"><option value="free">Free — everyone</option><option value="premium">Premium — subscribers/trial</option></select><button class="primary" onclick="addTV()">➕ Add TV</button></div><div id="tvlist"></div></section>
+<section id="tv" class="page"><div class="panel"><h2>📺 TV Manager</h2><input id="tq" placeholder="Search TV..." oninput="render()"><div class="row"><input id="tn" placeholder="Channel name"><input id="tu" placeholder="M3U8/HLS URL"></div><div class="row"><input id="tl" placeholder="Logo URL"><input id="tco" placeholder="Country"></div><input id="tcat" placeholder="Category"><button class="primary" onclick="addTV()">➕ Add TV</button></div><div id="tvlist"></div></section>
 
-<section id="radio" class="page"><div class="panel"><h2>📻 Radio Manager</h2><input id="rq" placeholder="Search Radio..." oninput="render()"><div class="row"><input id="rn" placeholder="Station name"><input id="ru" placeholder="Stream URL"></div><input id="rl" placeholder="Logo URL"><label for="rTier">Access level</label><select id="rTier"><option value="free">Free — everyone</option><option value="premium">Premium — subscribers/trial</option></select><button class="primary" onclick="addRadio()">➕ Add Radio</button></div><div id="rlist"></div></section>
-
-
-<section id="premium" class="page">
- <div class="panel">
-  <h2>👑 Premium Membership</h2>
-  <p class="muted">Manage Premium prices, grant or extend access by email, revoke access, and review grants. Admin API access is required for changes.</p>
-  <div class="cards">
-   <div class="card">🆓 Verified email trial<b>3 days</b><span class="muted">After email verification</span></div>
-   <div class="card">💳 Monthly price<b id="pMonthlyDisplay">499 ETB</b><span class="muted">Current plan price</span></div>
-   <div class="card">📅 Yearly price<b id="pYearlyDisplay">6,000 ETB</b><span class="muted">Current plan price</span></div>
-  </div>
-  <p id="premiumStatus" class="muted">Press Refresh to load Premium settings and access list.</p>
-  <button class="secondary" type="button" onclick="loadPremium()">🔄 Refresh Premium data</button>
- </div>
- <div class="panel">
-  <h3>💰 Premium pricing (ETB)</h3>
-  <label for="pMonthly">Monthly plan price</label><input id="pMonthly" type="number" min="0" step="1" value="499">
-  <label for="pYearly">Yearly plan price</label><input id="pYearly" type="number" min="0" step="1" value="6000">
-  <button class="primary" type="button" onclick="savePremiumPrices()">Save prices</button>
- </div>
- <div class="panel">
-  <h3>➕ Grant / extend Premium access</h3>
-  <label for="pEmail">User email address</label><input id="pEmail" type="email" placeholder="user@example.com" autocomplete="email">
-  <label for="pDuration">Access duration</label>
-  <select id="pDuration"><option value="7">7 days</option><option value="30" selected>30 days</option><option value="90">90 days</option><option value="365">365 days</option><option value="unlimited">Unlimited</option></select>
-  <div class="row"><button class="primary" type="button" onclick="grantPremium('grant')">Grant Premium</button><button class="secondary" type="button" onclick="grantPremium('extend')">Extend Premium</button></div>
-  <p class="muted">This grants access through the server API. It does not charge a payment or confirm Telebirr payment.</p>
- </div>
- <div class="panel">
-  <h3>📋 Premium access list</h3>
-  <input id="pGrantSearch" placeholder="Filter by email..." oninput="renderPremiumGrants()">
-  <div id="premiumGrantList"><p class="muted">Load Premium data to see grants.</p></div>
- </div>
-</section>
+<section id="radio" class="page"><div class="panel"><h2>📻 Radio Manager</h2><input id="rq" placeholder="Search Radio..." oninput="render()"><div class="row"><input id="rn" placeholder="Station name"><input id="ru" placeholder="Stream URL"></div><input id="rl" placeholder="Logo URL"><button class="primary" onclick="addRadio()">➕ Add Radio</button></div><div id="rlist"></div></section>
 
 <section id="ads" class="page"><div class="panel"><h2>📢 Advertisement Manager</h2><input id="an" placeholder="Advertisement name"><div class="row"><input id="at" placeholder="Title"><input id="ai" placeholder="Banner/Image URL"></div><input id="av" placeholder="Video URL (.mp4 / .webm / .m3u8)"><textarea id="ad" rows="3" placeholder="Description"></textarea><input id="au" placeholder="Click URL"><div class="row"><select id="ap"><option>Home</option><option>TV</option><option>Radio</option><option>All</option></select><input id="as" type="date"><input id="ae" type="date"></div><label class="switch"><input id="ax" type="checkbox" checked> Active</label><br><br><button class="primary" onclick="addAd()">➕ Add Advertisement</button></div><div id="alist"></div></section>
 
 <section id="notify" class="page"><div class="panel"><h2>🔔 Notification Manager</h2><input id="nt" placeholder="Notification title"><textarea id="nm" rows="3" placeholder="Message"></textarea><button class="primary" onclick="addNotify()">➕ Add Notification</button></div><div id="nlist"></div></section>
 
-<section id="settings" class="page"><div class="panel"><h2>⚙️ App Settings</h2><label>Version</label><input id="ver"><label class="switch"><input id="maint" type="checkbox"> Maintenance mode</label><br><br><label>Featured TV channel ID</label><input id="feat" placeholder="ID or blank"><button class="primary" onclick="saveSettings()">Save Settings</button><hr><h2>📰 Full Screen News Ticker</h2><p class="muted">Shows a small scrolling message at the bottom of every TV channel while the player is in Full Screen.</p><label class="switch"><input id="tickerEnabled" type="checkbox"> Enable ticker (ON/OFF)</label><label for="tickerText">Scrolling text</label><textarea id="tickerText" rows="3" maxlength="1200" placeholder="Enter news, announcements, or JON Stream messages"></textarea><label for="tickerSpeed">Ticker scrolling speed</label><select id="tickerSpeed"><option value="1m">1 minute</option><option value="2m">2 minutes</option><option value="3m">3 minutes</option><option value="5m" selected>5 minutes — slow default</option><option value="8m">8 minutes — very slow</option><option value="10m">10 minutes — extra slow</option></select><p class="muted">Choose how long one ticker scroll takes. The default is 5 minutes; 10 minutes is extra slow. Long messages are automatically slowed further for readability.</p><label for="tickerLogoUrl">Small logo image URL (optional)</label><input id="tickerLogoUrl" type="url" placeholder="https://example.com/logo.png"><p class="muted">Use a direct HTTPS/HTTP image URL. Logo is displayed small and will not cover the video.</p><button class="primary" onclick="saveSettings()">Save Ticker Settings</button>
-<hr><h2>🤝 Full Screen Sponsored Logos</h2>
-<p class="muted">Displays a small sponsor photo box only while a TV player is in Full Screen. Each photo shows for 10 seconds, then the next photo slides in from the right. The box slides up from the bottom and hides after the list finishes. The sequence repeats every 10 minutes.</p>
-<label class="switch"><input id="sponsorCarouselEnabled" type="checkbox"> Enable sponsored logos (ON/OFF)</label>
-<label for="sponsorPhotoUrls">Sponsor photo URLs (one direct HTTP/HTTPS image URL per line; order is display order)</label>
-<textarea id="sponsorPhotoUrls" rows="5" maxlength="10000" placeholder="https://example.com/sponsor-1.png&#10;https://example.com/sponsor-2.png"></textarea>
-<div class="row" style="align-items:center"><input id="sponsorSingleLogoUrl" type="url" placeholder="Add one more logo URL (HTTP/HTTPS)" aria-label="Add one sponsor logo URL"><button id="addSponsorLogoButton" type="button" class="secondary" style="flex:0 0 auto;margin:6px 0 11px">➕ Add Logo</button></div>
-<p class="muted">Or add logos one at a time using the Add Logo button. The URL is added to the list above and appears in Preview immediately; press Save Sponsored Logo Settings to publish it.</p>
-<p class="muted">Paste direct image links only (for example, a URL ending in .png, .jpg, .jpeg, or .webp). Up to 20 photos. Delete a URL line to remove a photo; reorder lines to change display order. Each photo displays for 10 seconds and the sequence repeats every 10 minutes.</p>
-<div id="sponsorPreviewWrap" style="border:1px solid #d5dbe5;border-radius:12px;padding:12px;margin:10px 0;background:#f8fafc"><h3 style="margin:0 0 8px">🖼️ Logo Preview <span id="sponsorPreviewCount" class="muted">0 / 20</span></h3><p class="muted">Check each logo before saving. Images are shown separately so they will not overlap. Change the URL order above to change display order.</p><div id="sponsorPreviewGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:10px"></div><p id="sponsorPreviewEmpty" class="muted" style="margin:8px 0">Paste image URLs above to preview logos here.</p></div>
-<button class="primary" onclick="saveSettings()">Save Sponsored Logo Settings</button>
-<hr><h3>🔐 Account</h3><p class="muted">Admin password is managed securely by Firebase Authentication.</p></div><div class="panel"><h3>Preview</h3><pre id="preview"></pre></div></section>
+<section id="settings" class="page"><div class="panel"><h2>⚙️ App Settings</h2><label>Version</label><input id="ver"><label class="switch"><input id="maint" type="checkbox"> Maintenance mode</label><br><br><label>Featured TV channel ID</label><input id="feat" placeholder="ID or blank"><button class="primary" onclick="saveSettings()">Save Settings</button><hr><h3>🔐 Account</h3><p class="muted">Admin password is managed securely by Firebase Authentication.</p></div><div class="panel"><h3>Preview</h3><pre id="preview"></pre></div></section>
 
 
 <section id="background" class="page">
@@ -82,114 +37,11 @@
 </section>
 </main></div>
 
-<script>
-/* Standalone sponsor-logo UI: keep Add Logo and Preview working even if Firebase module imports fail. */
-(function(){
-  const byId=id=>document.getElementById(id);
-  function renderPreview(){
-    const textarea=byId('sponsorPhotoUrls'),grid=byId('sponsorPreviewGrid'),empty=byId('sponsorPreviewEmpty'),count=byId('sponsorPreviewCount');
-    if(!textarea||!grid||!empty||!count)return;
-    const urls=textarea.value.split(/\r?\n/).map(s=>s.trim()).filter(Boolean).slice(0,20);
-    count.textContent=urls.length+' / 20';
-    grid.replaceChildren();
-    urls.forEach((url,index)=>{
-      const card=document.createElement('div');
-      card.style.cssText='min-width:0;border:1px solid #dbe2ea;border-radius:10px;padding:8px;background:#fff;overflow:hidden';
-      const heading=document.createElement('div');heading.textContent='Logo '+(index+1);heading.style.cssText='font-size:12px;font-weight:700;margin-bottom:6px';
-      const frame=document.createElement('div');frame.style.cssText='height:105px;display:flex;align-items:center;justify-content:center;background:#f1f5f9;border-radius:7px;padding:5px';
-      let valid=false;try{const parsed=new URL(url);valid=['http:','https:'].includes(parsed.protocol);}catch(_){}
-      if(valid){
-        const img=document.createElement('img');img.src=url;img.alt='Sponsor logo '+(index+1);img.style.cssText='display:block;max-width:100%;max-height:95px;width:auto;height:auto;object-fit:contain';
-        img.onerror=()=>{frame.replaceChildren();const err=document.createElement('span');err.textContent='Image failed to load — check direct image URL';err.style.cssText='color:#b91c1c;font-size:12px;text-align:center';frame.append(err);};
-        frame.append(img);
-      } else {frame.textContent='Invalid HTTP/HTTPS URL';frame.style.color='#b91c1c';}
-      const urlText=document.createElement('div');urlText.textContent=url;urlText.style.cssText='font-size:11px;color:#64748b;overflow-wrap:anywhere;margin-top:6px;max-height:42px;overflow:hidden';
-      card.append(heading,frame,urlText);grid.append(card);
-    });
-    empty.style.display=urls.length?'none':'block';
-  }
-  function addLogo(){
-    const field=byId('sponsorSingleLogoUrl'),textarea=byId('sponsorPhotoUrls');
-    const value=field.value.trim();
-    if(!value){field.focus();alert('Please enter a logo image URL first.');return;}
-    let parsed;try{parsed=new URL(value);if(!['http:','https:'].includes(parsed.protocol))throw new Error();}catch(_){field.focus();alert('Please enter a valid HTTP/HTTPS logo image URL.');return;}
-    const urls=textarea.value.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
-    if(urls.length>=20){alert('You can add up to 20 sponsor logos.');return;}
-    if(urls.includes(parsed.href)||urls.includes(value)){alert('This logo URL is already in the list.');return;}
-    urls.push(parsed.href);textarea.value=urls.join('\n');field.value='';renderPreview();
-    window.dispatchEvent(new CustomEvent('jon:sponsor-logo-added',{detail:{url:parsed.href}}));
-  }
-  document.addEventListener('DOMContentLoaded',function(){
-    const button=byId('addSponsorLogoButton'),textarea=byId('sponsorPhotoUrls'),field=byId('sponsorSingleLogoUrl');
-    if(button)button.addEventListener('click',addLogo);
-    if(field)field.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addLogo();}});
-    if(textarea)textarea.addEventListener('input',renderPreview);
-    renderPreview();
-  });
-})();
-</script>
-<script>
-(function(){
-  var button = document.getElementById('adminLoginButton');
-  var message = function(text){var el=document.getElementById('lm');if(el)el.textContent=text;};
-  // Bind through addEventListener instead of inline onclick, so login still responds when inline handlers are blocked.
-  if(button) button.addEventListener('click', function(event){
-    event.preventDefault();
-    if(typeof window.__jonAdminLoginClick === 'function') window.__jonAdminLoginClick();
-    else message('Login script is not ready. Reload the page and try again.');
-  });
-  ['le','lp'].forEach(function(id){var field=document.getElementById(id);if(field)field.addEventListener('keydown',function(event){if(event.key==='Enter'){event.preventDefault();if(button)button.click();}});});
-  window.__jonAdminLoginClick = async function(){
-    var email=(document.getElementById('le').value||'').trim();
-    var password=document.getElementById('lp').value||'';
-    if(!email||!password){message('Email and password are required.');return;}
-    // Always use this independent sign-in path; do not delegate to a possibly broken module login handler.
-    if(button){button.disabled=true;button.textContent='Connecting…';}
-    message('Starting secure sign-in…');
-    try {
-      var appMod=await import('https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js');
-      var authMod=await import('https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js');
-      var config={apiKey:'AIzaSyC5uNWNp9KbcepO36VQCx8gfbyPmZW4fxM',authDomain:'jon-stream.firebaseapp.com',projectId:'jon-stream',storageBucket:'jon-stream.firebasestorage.app',messagingSenderId:'189801194527',appId:'1:189801194527:web:c7d99f83a2c4c604fa212a'};
-      var app=appMod.getApps().length?appMod.getApp():appMod.initializeApp(config);
-      var auth=authMod.getAuth(app);
-      var timer;
-      await Promise.race([
-        authMod.signInWithEmailAndPassword(auth,email,password),
-        new Promise(function(_,reject){timer=setTimeout(function(){reject(new Error('Sign-in timed out after 15 seconds. Check connection and Firebase authorized domains.'));},15000);})
-      ]);
-      clearTimeout(timer);
-      // Do not reload after sign-in: embedded browsers can close/reset the app on reload.
-      // Firebase onAuthStateChanged in the module script will open the Admin UI.
-      message('Sign-in successful. Opening Admin App…');
-      var loginPanel=document.getElementById('login');
-      var appPanel=document.getElementById('app');
-      if(loginPanel)loginPanel.style.display='none';
-      if(appPanel)appPanel.style.display='block';
-    } catch(e) {
-      console.error('Admin login fallback:',e);
-      var errors={
-        'auth/invalid-credential':'Email or password is incorrect.',
-        'auth/invalid-email':'Enter a valid email address.',
-        'auth/user-disabled':'This account is disabled.',
-        'auth/too-many-requests':'Too many attempts. Wait and try again.',
-        'auth/network-request-failed':'Network error. Check your internet connection.',
-        'auth/operation-not-allowed':'Email/password sign-in is disabled in Firebase.',
-        'auth/unauthorized-domain':'This website domain is not authorized in Firebase Authentication.'
-      };
-      message(errors[e.code]||('Sign-in error: '+(e.code||'unknown')+' — '+(e.message||'Please try again.')));
-    } finally {
-      if(button){button.disabled=false;button.textContent='Login';}
-    }
-  };
-})();
-</script>
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app-check.js";
 
 import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
-
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
 const firebaseConfig={apiKey:"AIzaSyC5uNWNp9KbcepO36VQCx8gfbyPmZW4fxM",authDomain:"jon-stream.firebaseapp.com",projectId:"jon-stream",storageBucket:"jon-stream.firebasestorage.app",messagingSenderId:"189801194527",appId:"1:189801194527:web:c7d99f83a2c4c604fa212a"};
@@ -197,32 +49,23 @@ const firebaseConfig={apiKey:"AIzaSyC5uNWNp9KbcepO36VQCx8gfbyPmZW4fxM",authDomai
 let fbApp=null,db=null,appRef=null,auth=null;
 
 try{
+
   fbApp=initializeApp(firebaseConfig);
-  // Keep Authentication and Firestore available even if App Check/recaptcha setup fails.
-  auth=getAuth(fbApp);
+
   db=getFirestore(fbApp);
+  auth=getAuth(fbApp);
+
   appRef=doc(db,"jonStream","appData");
-}catch(e){
-  console.error("Firebase core init failed:",e);
-  const msg=document.getElementById("lm");
-  if(msg)msg.textContent="Firebase could not start. Check your connection and reload.";
-}
-try{
-  if(fbApp) initializeAppCheck(fbApp, {
-    provider: new ReCaptchaV3Provider("6Le3cbYtAAAAAOdcVa3NOG1Md2ZADXvlnvf-ZlU1"),
-    isTokenAutoRefreshEnabled: true
-  });
-}catch(e){
-  console.error("Firebase App Check init failed:",e);
-}
+
+}catch(e){console.error("Firebase init failed:",e)}
 
 let firebaseReady=false;
 
 const DKEY='jon_stream_admin_v2';let d=JSON.parse(localStorage.getItem(DKEY)||'null')||{tv:[],radio:[],ads:[],notifications:[],settings:{version:'1.0.0',maintenance:false,featured:''},backgrounds:[]};
 
-function startFirestoreSync(){if(!appRef)return;if(window.__JON_FS_SYNC_STARTED)return;window.__JON_FS_SYNC_STARTED=true;onSnapshot(appRef,snap=>{if(snap.exists()){const x=snap.data();d={...d,...x,tv:Array.isArray(x.tv)?x.tv:d.tv,radio:Array.isArray(x.radio)?x.radio:d.radio,ads:Array.isArray(x.ads)?x.ads:d.ads,notifications:Array.isArray(x.notifications)?x.notifications:d.notifications,backgrounds:Array.isArray(x.backgrounds)?x.backgrounds:d.backgrounds,settings:{...d.settings,...(x.settings||{})}};localStorage.setItem(DKEY,JSON.stringify(d));render();}firebaseReady=true;const st=document.getElementById('fbStatus');if(st)st.textContent='🟢 Firebase connected';},e=>{console.error('Firestore sync error:',e.code,e.message);window.__JON_FS_SYNC_STARTED=false;const st=document.getElementById('fbStatus');if(st)st.textContent='🔴 Firebase sync failed: '+(e.code||'unknown');});}const $=id=>document.getElementById(id);async function save(){localStorage.setItem(DKEY,JSON.stringify(d));render();const st=document.getElementById('fbStatus');try{if(st)st.textContent='🟡 Saving to Firebase...';if(!appRef)throw new Error('Firebase unavailable');if(!auth||!auth.currentUser)throw new Error('Admin is not authenticated');await setDoc(appRef,d,{merge:true});firebaseReady=true;if(st)st.textContent='🟢 Firebase synced';}catch(e){console.error('Firebase save error:',e.code,e.message,e);if(st)st.textContent='🟠 Firebase sync failed: '+(e.code||'unknown')+(e.message?' — '+e.message:'')+(auth&&auth.currentUser?' | UID: '+auth.currentUser.uid:' | No signed-in user');}}async function login(){const email=$('le').value.trim(),password=$('lp').value;const btn=document.querySelector('#login button.primary'),msg=$('lm');if(!email||!password){msg.textContent='Email and password are required.';return}if(!auth){msg.textContent='Firebase Authentication did not initialize. Reload the page and check your internet connection.';return}if(btn){btn.disabled=true;btn.textContent='Signing in...'}msg.textContent='Login started — connecting to Firebase Authentication…';let timeoutId;try{await Promise.race([signInWithEmailAndPassword(auth,email,password),new Promise((_,reject)=>{timeoutId=setTimeout(()=>reject(new Error('The sign-in request timed out after 15 seconds. Check internet access and Firebase authorized domains.')),15000)})]);msg.textContent='Sign-in successful. Opening Admin App…'}catch(e){console.error('Firebase Auth error:',e.code,e.message,e);const messages={'auth/invalid-credential':'Email or password is incorrect.','auth/invalid-email':'Enter a valid email address.','auth/user-disabled':'This account is disabled.','auth/too-many-requests':'Too many attempts. Wait and try again.','auth/network-request-failed':'Network error. Check your internet connection.','auth/operation-not-allowed':'Email/password sign-in is disabled in Firebase Console.','auth/unauthorized-domain':'This website domain is not authorized in Firebase Authentication.'};msg.textContent=messages[e.code]||('Login failed: '+(e.code||'request-error')+' — '+(e.message||'Please try again.'))}finally{clearTimeout(timeoutId);if(btn){btn.disabled=false;btn.textContent='Login'}}}function page(id,b){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));$(id).classList.add('active');document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));b.classList.add('active');render()}
+if(appRef) onSnapshot(appRef,snap=>{if(snap.exists()){d={...d,...snap.data(),tv:Array.isArray(snap.data().tv)?snap.data().tv:d.tv,radio:Array.isArray(snap.data().radio)?snap.data().radio:d.radio,ads:Array.isArray(snap.data().ads)?snap.data().ads:d.ads,notifications:Array.isArray(snap.data().notifications)?snap.data().notifications:d.notifications,backgrounds:Array.isArray(snap.data().backgrounds)?snap.data().backgrounds:d.backgrounds,settings:{...d.settings,...(snap.data().settings||{})}};localStorage.setItem(DKEY,JSON.stringify(d));render();}firebaseReady=true;const st=document.getElementById('fbStatus');if(st)st.textContent='🟢 Firebase connected';},e=>{console.error(e);const st=document.getElementById('fbStatus');if(st)st.textContent='🔴 Firebase connection failed';});const $=id=>document.getElementById(id);async function save(){localStorage.setItem(DKEY,JSON.stringify(d));render();try{if(!appRef)throw new Error('Firebase unavailable');await setDoc(appRef,d,{merge:true});firebaseReady=true;const st=document.getElementById('fbStatus');if(st)st.textContent='🟢 Firebase synced';}catch(e){console.error(e);const st=document.getElementById('fbStatus');if(st)st.textContent='🟠 Local save only — Firebase sync failed';}}async function login(){const email=$('le').value.trim(),password=$('lp').value;if(!email||!password){$('lm').textContent='Email and password are required.';return}if(!auth){$('lm').textContent='Firebase Authentication unavailable.';return}$('lm').textContent='Signing in...';try{await signInWithEmailAndPassword(auth,email,password);$('lm').textContent=''}catch(e){console.error(e);$('lm').textContent='Login failed. Check your email and password.'}}function page(id,b){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));$(id).classList.add('active');document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));b.classList.add('active');render()}
 
-function addTV(){if(!tn.value.trim()||!tu.value.trim())return alert('Name and URL required');d.tv.push({id:Date.now(),name:tn.value.trim(),url:tu.value.trim(),logo:tl.value.trim(),country:tco.value.trim(),category:tcat.value.trim(),accessTier:$("tTier").value==="premium"?"premium":"free",enabled:true,featured:false});['tn','tu','tl','tco','tcat'].forEach(x=>$(x).value='');$("tTier").value="free";save()}function addRadio(){if(!rn.value.trim()||!ru.value.trim())return alert('Name and URL required');d.radio.push({id:Date.now(),name:rn.value.trim(),url:ru.value.trim(),logo:rl.value.trim(),accessTier:$("rTier").value==="premium"?"premium":"free",enabled:true});['rn','ru','rl'].forEach(x=>$(x).value='');$("rTier").value="free";save()}function addAd(){if(!an.value.trim()||!at.value.trim())return alert('Advertisement name and title required');d.ads.unshift({id:Date.now(),name:an.value.trim(),title:at.value.trim(),image:ai.value.trim(),videoUrl:av.value.trim(),description:ad.value.trim(),url:au.value.trim(),position:ap.value,start:as.value,end:ae.value,enabled:ax.checked});['an','at','ai','av','ad','au','as','ae'].forEach(x=>$(x).value='');ax.checked=true;save()}function addNotify(){if(!nt.value.trim()||!nm.value.trim())return alert('Title and message required');d.notifications.unshift({id:Date.now(),title:nt.value.trim(),message:nm.value.trim(),date:new Date().toISOString(),enabled:true});nt.value='';nm.value='';save()}function linkPremiumChannel(type,id){const x=(d[type]||[]).find(c=>String(c.id)===String(id));if(!x||String(x.accessTier||'free').toLowerCase()!=='premium')return alert('This option is available only for Premium channels.');const sel=document.getElementById('plink-'+type+'-'+id);const linkedId=sel&&sel.value;if(!linkedId)return alert('Choose a channel from the main list first.');const all=[...d.tv.map(c=>({...c,_group:'TV'})),...d.radio.map(c=>({...c,_group:'Radio'}))];const match=all.find(c=>String(c.id)===String(linkedId));if(!match)return alert('Selected channel was not found in the main list.');if(!confirm('Link Premium channel "'+(x.name||x.title||'')+'" to "'+(match._group+' — '+(match.name||match.title||''))+'" (ID: '+match.id+')?'))return;x.premiumChannelId=String(match.id);save()}function setTier(type,id,tier){let x=(d[type]||[]).find(x=>String(x.id)===String(id));if(!x)return;x.accessTier=tier==="premium"?"premium":"free";save()}function toggle(type,id){let x=d[type].find(x=>x.id===id);if(x)x.enabled=!x.enabled;save()}function del(type,id){if(confirm('Delete?')){d[type]=d[type].filter(x=>x.id!==id);save()}}function edit(type,id){let x=d[type].find(x=>x.id===id);if(!x)return;let n=prompt('Name/title:',x.name||x.title);if(n===null)return;x.name?x.name=n.trim()||x.name:x.title=n.trim()||x.title;if(x.url!==undefined){let u=prompt('Stream URL:',x.url);if(u!==null)x.url=u.trim()||x.url}save()}function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function addTV(){if(!tn.value.trim()||!tu.value.trim())return alert('Name and URL required');d.tv.push({id:Date.now(),name:tn.value.trim(),url:tu.value.trim(),logo:tl.value.trim(),country:tco.value.trim(),category:tcat.value.trim(),enabled:true,featured:false});['tn','tu','tl','tco','tcat'].forEach(x=>$(x).value='');save()}function addRadio(){if(!rn.value.trim()||!ru.value.trim())return alert('Name and URL required');d.radio.push({id:Date.now(),name:rn.value.trim(),url:ru.value.trim(),logo:rl.value.trim(),enabled:true});['rn','ru','rl'].forEach(x=>$(x).value='');save()}function addAd(){if(!an.value.trim()||!at.value.trim())return alert('Advertisement name and title required');d.ads.unshift({id:Date.now(),name:an.value.trim(),title:at.value.trim(),image:ai.value.trim(),videoUrl:av.value.trim(),description:ad.value.trim(),url:au.value.trim(),position:ap.value,start:as.value,end:ae.value,enabled:ax.checked});['an','at','ai','av','ad','au','as','ae'].forEach(x=>$(x).value='');ax.checked=true;save()}function addNotify(){if(!nt.value.trim()||!nm.value.trim())return alert('Title and message required');d.notifications.unshift({id:Date.now(),title:nt.value.trim(),message:nm.value.trim(),date:new Date().toISOString(),enabled:true});nt.value='';nm.value='';save()}function toggle(type,id){let x=d[type].find(x=>x.id===id);if(x)x.enabled=!x.enabled;save()}function del(type,id){if(confirm('Delete?')){d[type]=d[type].filter(x=>x.id!==id);save()}}function edit(type,id){let x=d[type].find(x=>x.id===id);if(!x)return;let n=prompt('Name/title:',x.name||x.title);if(n===null)return;x.name?x.name=n.trim()||x.name:x.title=n.trim()||x.title;if(x.url!==undefined){let u=prompt('Stream URL:',x.url);if(u!==null)x.url=u.trim()||x.url}save()}function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 
 
 function addBackground(){
@@ -260,7 +103,7 @@ function editBackground(id){
   if(sec!==null)x.seconds=Math.max(1,Number(sec)||5);
   save();
 }
-function premiumIdMatchStatus(x){if(String(x.accessTier||'free').toLowerCase()!=='premium')return '';const id=String(x.premiumChannelId||'');const target=[...d.tv,...d.radio].find(c=>String(c.id)===id);return target?'<span class="badge" style="background:#15803d;color:#fff;border:1px solid #16a34a">🟢 ID MATCHED</span>':'<span class="badge off" style="background:#b91c1c;color:#fff">🔴 ID NOT MATCHED</span>'}\nfunction render(){tc.textContent=d.tv.length;rc.textContent=d.radio.length;ac.textContent=d.ads.length;nc.textContent=d.notifications.length;ver.value=d.settings.version;maint.checked=d.settings.maintenance;feat.value=d.settings.featured||'';const ticker=d.settings.newsTicker||{};$('tickerEnabled').checked=!!ticker.enabled;$('tickerText').value=ticker.text||'';$('tickerLogoUrl').value=ticker.logoUrl||'';$('tickerSpeed').value=['1m','2m','3m','5m','8m','10m'].includes(ticker.speed)?ticker.speed:'5m';const sponsor=d.settings.sponsorLogoCarousel||{};$('sponsorCarouselEnabled').checked=sponsor.enabled===true;$('sponsorPhotoUrls').value=Array.isArray(sponsor.photos)?sponsor.photos.join('\n'):'';renderSponsorPreview();preview.textContent=JSON.stringify(d,null,2);let q=(tq.value||'').toLowerCase();tvlist.innerHTML=d.tv.filter(x=>(x.name+' '+x.country+' '+x.category).toLowerCase().includes(q)).map(x=>`<div class="item"><h3>📺 ${esc(x.name)} <span class="badge ${String(x.accessTier||'free').toLowerCase()==='premium'?'off':''}">${String(x.accessTier||'free').toLowerCase()==='premium'?'PREMIUM':'FREE'}</span> ${premiumIdMatchStatus(x)} ${x.enabled?'<span class="badge">ON</span>':'<span class="badge off">OFF</span>'}</h3><div class="muted">${esc(x.country)} • ${esc(x.category)}<br>${esc(x.url)}</div><div class="actions">${String(x.accessTier||'free').toLowerCase()==='premium'?'<div style="flex-basis:100%;padding:8px 0"><label>Link matching channel ID from main list</label><select id="plink-tv-'+esc(x.id)+'"><option value="">Choose TV/Radio channel</option>'+[...d.tv.map(c=>({...c,_group:'TV'})),...d.radio.map(c=>({...c,_group:'Radio'}))].map(c=>'<option value="'+esc(c.id)+'" '+(String(x.premiumChannelId||'')===String(c.id)?'selected':'')+'>'+esc(c._group+' — '+(c.name||c.title||'Unnamed')+' (ID: '+c.id+')')+'</option>').join('')+'</select><button class="secondary" onclick="linkPremiumChannel(\'tv\',${x.id})">Link Channel ID</button></div>':''}<button class="secondary" onclick="setTier('tv',${x.id},'free')">Set Free</button><button class="secondary" onclick="setTier('tv',${x.id},'premium')">Set Premium</button><button class="secondary" onclick="edit('tv',${x.id})">✏️ Edit</button><button class="secondary" onclick="toggle('tv',${x.id})">${x.enabled?'Disable':'Enable'}</button><button class="danger" onclick="del('tv',${x.id})">Delete</button></div></div>`).join('')||'<div class="panel muted">No TV channels.</div>';let r=(rq.value||'').toLowerCase();rlist.innerHTML=d.radio.filter(x=>x.name.toLowerCase().includes(r)).map(x=>`<div class="item"><h3>📻 ${esc(x.name)} <span class="badge ${String(x.accessTier||'free').toLowerCase()==='premium'?'off':''}">${String(x.accessTier||'free').toLowerCase()==='premium'?'PREMIUM':'FREE'}</span> ${premiumIdMatchStatus(x)} ${x.enabled?'<span class="badge">ON</span>':'<span class="badge off">OFF</span>'}</h3><div class="muted">${esc(x.url)}</div><div class="actions">${String(x.accessTier||'free').toLowerCase()==='premium'?'<div style="flex-basis:100%;padding:8px 0"><label>Link matching channel ID from main list</label><select id="plink-radio-'+esc(x.id)+'"><option value="">Choose TV/Radio channel</option>'+[...d.tv.map(c=>({...c,_group:'TV'})),...d.radio.map(c=>({...c,_group:'Radio'}))].map(c=>'<option value="'+esc(c.id)+'" '+(String(x.premiumChannelId||'')===String(c.id)?'selected':'')+'>'+esc(c._group+' — '+(c.name||c.title||'Unnamed')+' (ID: '+c.id+')')+'</option>').join('')+'</select><button class="secondary" onclick="linkPremiumChannel(\'radio\',${x.id})">Link Channel ID</button></div>':''}<button class="secondary" onclick="setTier('radio',${x.id},'free')">Set Free</button><button class="secondary" onclick="setTier('radio',${x.id},'premium')">Set Premium</button><button class="secondary" onclick="edit('radio',${x.id})">✏️ Edit</button><button class="secondary" onclick="toggle('radio',${x.id})">${x.enabled?'Disable':'Enable'}</button><button class="danger" onclick="del('radio',${x.id})">Delete</button></div></div>`).join('')||'<div class="panel muted">No radio stations.</div>';alist.innerHTML=d.ads.map(x=>`<div class="item"><h3>📢 ${esc(x.title)} ${x.enabled?'<span class="badge">ON</span>':'<span class="badge off">OFF</span>'}</h3><div class="muted">${esc(x.name)} • Position: ${esc(x.position)}<br>${esc(x.start||'')} → ${esc(x.end||'')}</div><p>${esc(x.description)}</p><div class="muted">Image: ${esc(x.image)}<br>Video: ${esc(x.videoUrl||x.videoURL||x.video||x.mediaUrl||'')}<br>Click: ${esc(x.url)}</div><div class="actions"><button class="secondary" onclick="toggle('ads',${x.id})">${x.enabled?'Disable':'Enable'}</button><button class="danger" onclick="del('ads',${x.id})">Delete</button></div></div>`).join('')||'<div class="panel muted">No advertisements.</div>';nlist.innerHTML=d.notifications.map(x=>`<div class="item"><h3>🔔 ${esc(x.title)}</h3><p>${esc(x.message)}</p><div class="actions"><button class="secondary" onclick="toggle('notifications',${x.id})">${x.enabled?'Disable':'Enable'}</button><button class="danger" onclick="del('notifications',${x.id})">Delete</button></div></div>`).join('')||'<div class="panel muted">No notifications.</div>';
+function render(){tc.textContent=d.tv.length;rc.textContent=d.radio.length;ac.textContent=d.ads.length;nc.textContent=d.notifications.length;ver.value=d.settings.version;maint.checked=d.settings.maintenance;feat.value=d.settings.featured||'';preview.textContent=JSON.stringify(d,null,2);let q=(tq.value||'').toLowerCase();tvlist.innerHTML=d.tv.filter(x=>(x.name+' '+x.country+' '+x.category).toLowerCase().includes(q)).map(x=>`<div class="item"><h3>📺 ${esc(x.name)} ${x.enabled?'<span class="badge">ON</span>':'<span class="badge off">OFF</span>'}</h3><div class="muted">${esc(x.country)} • ${esc(x.category)}<br>${esc(x.url)}</div><div class="actions"><button class="secondary" onclick="edit('tv',${x.id})">✏️ Edit</button><button class="secondary" onclick="toggle('tv',${x.id})">${x.enabled?'Disable':'Enable'}</button><button class="danger" onclick="del('tv',${x.id})">Delete</button></div></div>`).join('')||'<div class="panel muted">No TV channels.</div>';let r=(rq.value||'').toLowerCase();rlist.innerHTML=d.radio.filter(x=>x.name.toLowerCase().includes(r)).map(x=>`<div class="item"><h3>📻 ${esc(x.name)} ${x.enabled?'<span class="badge">ON</span>':'<span class="badge off">OFF</span>'}</h3><div class="muted">${esc(x.url)}</div><div class="actions"><button class="secondary" onclick="edit('radio',${x.id})">✏️ Edit</button><button class="secondary" onclick="toggle('radio',${x.id})">${x.enabled?'Disable':'Enable'}</button><button class="danger" onclick="del('radio',${x.id})">Delete</button></div></div>`).join('')||'<div class="panel muted">No radio stations.</div>';alist.innerHTML=d.ads.map(x=>`<div class="item"><h3>📢 ${esc(x.title)} ${x.enabled?'<span class="badge">ON</span>':'<span class="badge off">OFF</span>'}</h3><div class="muted">${esc(x.name)} • Position: ${esc(x.position)}<br>${esc(x.start||'')} → ${esc(x.end||'')}</div><p>${esc(x.description)}</p><div class="muted">Image: ${esc(x.image)}<br>Video: ${esc(x.videoUrl||x.videoURL||x.video||x.mediaUrl||'')}<br>Click: ${esc(x.url)}</div><div class="actions"><button class="secondary" onclick="toggle('ads',${x.id})">${x.enabled?'Disable':'Enable'}</button><button class="danger" onclick="del('ads',${x.id})">Delete</button></div></div>`).join('')||'<div class="panel muted">No advertisements.</div>';nlist.innerHTML=d.notifications.map(x=>`<div class="item"><h3>🔔 ${esc(x.title)}</h3><p>${esc(x.message)}</p><div class="actions"><button class="secondary" onclick="toggle('notifications',${x.id})">${x.enabled?'Disable':'Enable'}</button><button class="danger" onclick="del('notifications',${x.id})">Delete</button></div></div>`).join('')||'<div class="panel muted">No notifications.</div>';
 let bl=d.backgrounds||[];
 bglist.innerHTML=bl.map(x=>`<div class="item">
 <h3>🖼️ ${esc(x.name||'Background')} ${x.enabled?'<span class="badge">ON</span>':'<span class="badge off">OFF</span>'}</h3>
@@ -272,124 +115,9 @@ bglist.innerHTML=bl.map(x=>`<div class="item">
 <button class="danger" onclick="deleteBackground(${x.id})">Delete</button>
 </div></div>`).join('')||'<div class="panel muted">No background images.</div>'}
 
-function renderSponsorPreview(){
-const raw=($('sponsorPhotoUrls').value||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean).slice(0,20);
-const grid=$('sponsorPreviewGrid'),empty=$('sponsorPreviewEmpty'),count=$('sponsorPreviewCount');
-if(!grid||!empty||!count)return;
-count.textContent=raw.length+' / 20';
-grid.innerHTML=raw.map((url,i)=>{
-let safe='';
-try{const u=new URL(url);if(['http:','https:'].includes(u.protocol))safe=u.href;}catch(e){}
-const image=safe?'<div style="height:105px;display:flex;align-items:center;justify-content:center;background:#f1f5f9;border-radius:7px;padding:5px"><img src="'+esc(safe)+'" alt="Sponsor logo '+(i+1)+'" loading="lazy" style="display:block;max-width:100%;max-height:95px;width:auto;height:auto;object-fit:contain" onerror="this.style.display=\'none\';this.parentElement.innerHTML=\'<span style=&quot;color:#b91c1c;font-size:12px;text-align:center&quot;>Image failed to load<br>Check direct image URL</span>\'"></div>':'<div style="height:105px;display:flex;align-items:center;justify-content:center;background:#fff1f2;color:#b91c1c;border-radius:7px;font-size:12px;text-align:center;padding:8px">Invalid HTTP/HTTPS URL</div>';
-return '<div style="min-width:0;border:1px solid #dbe2ea;border-radius:10px;padding:8px;background:#fff;overflow:hidden"><div style="font-size:12px;font-weight:700;margin-bottom:6px">Logo '+(i+1)+'</div>'+image+'<div style="font-size:11px;color:#64748b;overflow-wrap:anywhere;margin-top:6px;max-height:42px;overflow:hidden">'+esc(url)+'</div></div>';
-}).join('');
-empty.style.display=raw.length?'none':'block';
-}
-$('sponsorPhotoUrls').addEventListener('input',renderSponsorPreview);
-async function addSponsorLogoUrl(){
-const field=$('sponsorSingleLogoUrl');
-const value=field.value.trim();
-if(!value){field.focus();return alert('Please enter a logo image URL first.');}
-let url;
-try{url=new URL(value);if(!['http:','https:'].includes(url.protocol))throw 0;}catch(e){field.focus();return alert('Please enter a valid HTTP/HTTPS logo image URL.');}
-const current=($('sponsorPhotoUrls').value||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
-if(current.length>=20)return alert('You can add up to 20 sponsor logos.');
-if(current.includes(url.href)||current.includes(value))return alert('This logo URL is already in the list.');
-current.push(url.href);
-$('sponsorPhotoUrls').value=current.join('\n');
-field.value='';
-d.settings.sponsorLogoCarousel={...(d.settings.sponsorLogoCarousel||{}),enabled:$('sponsorCarouselEnabled').checked,photos:current,intervalMinutes:10,photoSeconds:10};
-renderSponsorPreview();
-await save();
-const status=$('fbStatus');
-if(status && !status.textContent.includes('failed'))status.textContent='🟢 Logo added and saved';
-}
-window.addEventListener('jon:sponsor-logo-added',async e=>{
-const current=($('sponsorPhotoUrls').value||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
-d.settings.sponsorLogoCarousel={...(d.settings.sponsorLogoCarousel||{}),enabled:$('sponsorCarouselEnabled').checked,photos:current,intervalMinutes:10,photoSeconds:10};
-await save();
-const status=$('fbStatus');
-if(status&&!status.textContent.includes('failed'))status.textContent='🟢 Logo added and saved';
-});
-function saveSettings(){
-const logoUrl=$('tickerLogoUrl').value.trim();
-if(logoUrl){try{const u=new URL(logoUrl);if(!['http:','https:'].includes(u.protocol))throw 0;}catch(e){alert('Please enter a valid HTTP/HTTPS ticker logo image URL.');return;}}
-const rawPhotos=$('sponsorPhotoUrls').value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
-if(rawPhotos.length>20){alert('Please use no more than 20 sponsor photos.');return;}
-const sponsorPhotos=[];
-for(const value of rawPhotos){try{const u=new URL(value);if(!['http:','https:'].includes(u.protocol))throw 0;sponsorPhotos.push(value);}catch(e){alert('Invalid sponsor photo URL: '+value);return;}}
-d.settings.version=ver.value.trim()||'1.0.0';
-d.settings.maintenance=maint.checked;
-d.settings.featured=feat.value.trim();
-d.settings.newsTicker={enabled:$('tickerEnabled').checked,text:$('tickerText').value.trim(),logoUrl,speed:['1m','2m','3m','5m','8m','10m'].includes($('tickerSpeed').value)?$('tickerSpeed').value:'5m'};
-d.settings.sponsorLogoCarousel={enabled:$('sponsorCarouselEnabled').checked,photos:sponsorPhotos,intervalMinutes:10,photoSeconds:10};
-save();alert('Settings saved');
-}
-let premiumGrantsCache=[];
-const PREMIUM_API='https://jon-stream.vercel.app/api/subscription';
-async function premiumApi(path, options={}){
- const user=auth&&auth.currentUser;
- if(!user)throw new Error('Please log in to Admin first.');
- const token=await user.getIdToken();
- const response=await fetch(PREMIUM_API+path,{...options,headers:{'Content-Type':'application/json','Authorization':'Bearer '+token,...(options.headers||{})}});
- let body={};try{body=await response.json()}catch(e){}
- if(!response.ok)throw new Error(body.error||('Request failed ('+response.status+')'));
- return body;
-}
-function premiumMessage(message,isError=false){const el=$('premiumStatus');if(el){el.textContent=message;el.style.color=isError?'#b91c1c':'#166534';}}
-async function loadPremium(){
- premiumMessage('Loading Premium settings and grants...');
- try{
-  const config=await premiumApi('/config');
-  $('pMonthly').value=config.monthlyPriceETB??499;$('pYearly').value=config.yearlyPriceETB??6000;
-  $('pMonthlyDisplay').textContent=Number(config.monthlyPriceETB??499).toLocaleString()+' ETB';
-  $('pYearlyDisplay').textContent=Number(config.yearlyPriceETB??6000).toLocaleString()+' ETB';
-  const grants=await premiumApi('/grants');
-  premiumGrantsCache=Array.isArray(grants.grants)?grants.grants:(Array.isArray(grants)?grants:[]);
-  renderPremiumGrants();premiumMessage('Premium settings loaded. Access grants: '+premiumGrantsCache.length+'.');
- }catch(e){premiumMessage('Could not load Premium data: '+e.message+' — confirm Vercel Preview/Production API and admin UID setup.',true);}
-}
-async function savePremiumPrices(){
- const monthly=Number($('pMonthly').value),yearly=Number($('pYearly').value);
- if(!Number.isFinite(monthly)||monthly<0||!Number.isFinite(yearly)||yearly<0)return alert('Enter valid non-negative prices in ETB.');
- try{
-  premiumMessage('Saving prices...');
-  const data=await premiumApi('/config',{method:'POST',body:JSON.stringify({monthlyPriceETB:monthly,yearlyPriceETB:yearly})});
-  $('pMonthlyDisplay').textContent=Number(data.monthlyPriceETB).toLocaleString()+' ETB';$('pYearlyDisplay').textContent=Number(data.yearlyPriceETB).toLocaleString()+' ETB';
-  premiumMessage('Premium prices saved successfully.');
- }catch(e){premiumMessage('Price save failed: '+e.message,true);alert('Could not save prices: '+e.message);}
-}
-async function grantPremium(action){
- const email=$('pEmail').value.trim().toLowerCase(),duration=$('pDuration').value;
- if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return alert('Enter a valid user email address.');
- if(action==='extend'&&!confirm('Extend Premium access for '+email+'?'))return;
- try{
-  premiumMessage(action==='extend'?'Extending Premium access...':'Granting Premium access...');
-  const result=await premiumApi('/grant',{method:'POST',body:JSON.stringify({action,email,duration:duration==='unlimited'?'unlimited':Number(duration)})});
-  premiumMessage('Premium '+(action==='extend'?'extended':'granted')+' for '+email+(result.expiresAt?'. Expires: '+new Date(result.expiresAt).toLocaleString():'. Unlimited access.')+(result.accountFound?'':' Account not registered yet; email grant saved.'));
-  await loadPremium();
- }catch(e){premiumMessage('Premium grant failed: '+e.message,true);alert('Could not update Premium access: '+e.message);}
-}
-async function revokePremium(email){
- if(!confirm('Revoke Premium access for '+email+'?'))return;
- try{await premiumApi('/grant',{method:'POST',body:JSON.stringify({action:'revoke',email})});premiumMessage('Premium access revoked for '+email+'.');await loadPremium();}
- catch(e){premiumMessage('Revoke failed: '+e.message,true);alert('Could not revoke Premium: '+e.message);}
-}
-function renderPremiumGrants(){
- const target=$('premiumGrantList');if(!target)return;
- const q=($('pGrantSearch')?.value||'').trim().toLowerCase();
- const rows=premiumGrantsCache.filter(g=>String(g.email||'').toLowerCase().includes(q));
- target.innerHTML=rows.map(g=>{
-  const email=String(g.email||'Unknown email');
-  const active=!!g.active&&(g.unlimited||!g.expiresAt||new Date(g.expiresAt).getTime()>Date.now());
-  const expiry=g.unlimited?'Unlimited':(g.expiresAt?new Date(g.expiresAt).toLocaleString():'No expiry supplied');
-  return '<div class="item"><h3>'+esc(email)+' '+(active?'<span class="badge">ACTIVE</span>':'<span class="badge off">INACTIVE / EXPIRED</span>')+'</h3><div class="muted">Expires: '+esc(expiry)+'</div><div class="actions"><button class="danger" type="button" onclick="revokePremium('+JSON.stringify(email).replace(/</g,'\\u003c')+')">Revoke access</button></div></div>';
- }).join('')||'<p class="muted">No matching Premium grants were returned by the API.</p>';
-}
+function saveSettings(){d.settings.version=ver.value.trim()||'1.0.0';d.settings.maintenance=maint.checked;d.settings.featured=feat.value.trim();save();alert('Saved')}async function logout(){try{if(auth)await signOut(auth)}catch(e){console.error(e)}}function exportData(){let b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='data.json';a.click()}function importData(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(!x.tv||!x.radio)throw 0;d=x;save();alert('Imported')}catch(_){alert('Invalid data.json')}};r.readAsText(f)}
 
-async function logout(){try{if(auth)await signOut(auth)}catch(e){console.error(e)}}function exportData(){let b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='data.json';a.click()}function importData(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(!x.tv||!x.radio)throw 0;d=x;save();alert('Imported')}catch(_){alert('Invalid data.json')}};r.readAsText(f)}
-
-window.addSponsorLogoUrl=addSponsorLogoUrl;document.getElementById('addSponsorLogoButton')?.addEventListener('click',addSponsorLogoUrl);window.page=page;window.login=login;window.loadPremium=loadPremium;window.savePremiumPrices=savePremiumPrices;window.grantPremium=grantPremium;window.revokePremium=revokePremium;window.renderPremiumGrants=renderPremiumGrants;
-onAuthStateChanged(auth,user=>{if(user){$('login').style.display='none';$('app').style.display='block';startFirestoreSync();render()}else{$('login').style.display='flex';$('app').style.display='none';$('lp').value='';}});window.addTV=addTV;window.addRadio=addRadio;window.setTier=setTier;window.addAd=addAd;window.addNotify=addNotify;window.toggle=toggle;window.del=del;window.edit=edit;window.saveSettings=saveSettings;window.logout=logout;window.exportData=exportData;window.importData=importData;window.addBackground=addBackground;window.toggleBackground=toggleBackground;window.deleteBackground=deleteBackground;window.editBackground=editBackground;
+window.page=page;window.login=login;
+onAuthStateChanged(auth,user=>{if(user){$('login').style.display='none';$('app').style.display='block';render()}else{$('login').style.display='flex';$('app').style.display='none';$('lp').value='';}});window.addTV=addTV;window.addRadio=addRadio;window.addAd=addAd;window.addNotify=addNotify;window.toggle=toggle;window.del=del;window.edit=edit;window.saveSettings=saveSettings;window.logout=logout;window.exportData=exportData;window.importData=importData;window.addBackground=addBackground;window.toggleBackground=toggleBackground;window.deleteBackground=deleteBackground;window.editBackground=editBackground;
 
 </script></body></html>
